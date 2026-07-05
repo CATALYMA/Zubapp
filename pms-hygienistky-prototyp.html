@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZubApp PMS — pro nezávislé dentální hygienistky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/dist/tabler-icons.min.css">
+<style>
+  :root{
+    --teal-50:#e1f5ee; --teal-100:#c3ebdd; --teal-400:#1d9e75; --teal-500:#158a64; --teal-600:#0f6e56; --teal-700:#0a5945; --teal-900:#04342c;
+    --amber-50:#faeeda; --amber-500:#ef9f27; --amber-700:#854f0b;
+    --red-50:#fcebeb; --red-500:#e24b4a; --red-700:#791f1f;
+    --blue-50:#e6f1fb; --blue-500:#378add; --blue-700:#0c447c;
+    --purple-50:#eeedfe; --purple-500:#7f77dd; --purple-700:#3c3489;
+    --ink:#1b2624; --ink-2:#4c5b57; --ink-3:#8a9995; --line:#e3e8e6; --line-2:#d3dbd8;
+    --bg:#f4f7f6; --card:#ffffff;
+    --radius:12px; --radius-sm:8px;
+    --shadow-sm:0 1px 2px rgba(20,40,35,.06);
+    --shadow-md:0 4px 16px rgba(20,40,35,.08);
+    --shadow-lg:0 12px 32px rgba(20,40,35,.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg); color:var(--ink);
+    font-size:14px; line-height:1.5;
+  }
+  .app{display:flex; min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{
+    width:240px; flex-shrink:0; background:#0d3a30; color:#eafaf3;
+    display:flex; flex-direction:column; padding:20px 14px;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .brand{display:flex; align-items:center; gap:10px; padding:4px 8px 18px 8px;}
+  .brand-mark{width:34px; height:34px; border-radius:9px; background:var(--teal-500); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:#fff; flex-shrink:0;}
+  .brand-text b{display:block; font-size:15px; font-weight:600;}
+  .brand-text span{display:block; font-size:11px; color:#9fd6c1;}
+
+  .tenant-card{background:rgba(255,255,255,.06); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px;}
+  .tenant-card .name{font-weight:600; font-size:13px;}
+  .tenant-card .role{font-size:11.5px; color:#9fd6c1; margin-top:1px;}
+  .verify-pill{display:inline-flex; align-items:center; gap:5px; margin-top:9px; font-size:11px; padding:3px 8px; border-radius:20px; font-weight:600;}
+  .verify-pill.ok{background:rgba(93,202,165,.18); color:#8fe6c4;}
+  .verify-pill.pending{background:rgba(239,159,39,.2); color:#f6c477;}
+
+  .navgroup-label{font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#6fa791; font-weight:700; padding:14px 10px 5px;}
+  nav.navlist{display:flex; flex-direction:column; gap:1px;}
+  .navitem{
+    display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:var(--radius-sm);
+    color:#c7e6da; text-decoration:none; font-size:13px; font-weight:500; cursor:pointer; border:none; background:transparent; width:100%; text-align:left;
+  }
+  .navitem i{font-size:17px; width:17px; text-align:center;}
+  .navitem:hover{background:rgba(255,255,255,.07); color:#fff;}
+  .navitem.active{background:var(--teal-600); color:#fff;}
+  .navitem .badge-count{margin-left:auto; background:var(--amber-500); color:#3a2400; font-size:10.5px; font-weight:700; padding:1px 6px; border-radius:20px;}
+  .navitem .badge-count.red{background:var(--red-500); color:#fff;}
+
+  .sidebar-foot{border-top:1px solid rgba(255,255,255,.1); padding-top:12px; margin-top:12px;}
+  .demo-toggle{
+    width:100%; background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.25); color:#c7e6da;
+    border-radius:var(--radius-sm); padding:8px 10px; font-size:11.5px; cursor:pointer; text-align:left; line-height:1.4; margin-bottom:8px;
+  }
+  .demo-toggle:hover{background:rgba(255,255,255,.12);}
+
+  /* MAIN */
+  .main{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .topbar{
+    display:flex; align-items:center; gap:12px; padding:14px 28px; background:var(--card); border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:20;
+  }
+  .search{
+    flex:1; max-width:340px; display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--line);
+    border-radius:var(--radius-sm); padding:8px 12px; color:var(--ink-3);
+  }
+  .search input{border:none; background:transparent; outline:none; font-size:13.5px; width:100%; color:var(--ink); font-family:inherit;}
+  .topbar-spacer{flex:1;}
+  .icon-btn{
+    position:relative; width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-2); font-size:17px; flex-shrink:0;
+  }
+  .icon-btn:hover{background:var(--bg);}
+  .dot{position:absolute; top:6px; right:7px; width:7px; height:7px; border-radius:50%; background:var(--red-500); border:1.5px solid #fff;}
+  .avatar{
+    width:36px; height:36px; border-radius:50%; background:var(--teal-100); color:var(--teal-700); font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .verify-banner{
+    display:none; align-items:center; gap:12px; background:var(--amber-50); color:var(--amber-700); padding:10px 28px; font-size:13px; font-weight:500;
+    border-bottom:1px solid #f2d9a8;
+  }
+  .verify-banner.show{display:flex;}
+  .verify-banner i{font-size:18px;}
+  .verify-banner button{
+    margin-left:auto; background:var(--amber-500); border:none; color:#3a2400; font-weight:600; font-size:12.5px; padding:7px 14px; border-radius:var(--radius-sm); cursor:pointer;
+  }
+
+  .content{padding:26px 28px 60px; max-width:1180px; width:100%; margin:0 auto;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .screen-tag{display:inline-flex; align-items:center; gap:5px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12.5px; font-weight:700; letter-spacing:.03em; color:var(--amber-700); background:var(--amber-50); border:1px solid #f0d9a8; border-radius:6px; padding:3px 10px; margin-bottom:8px;}
+  .screen-tag::before{content:'#'; opacity:.6;}
+  .screen-tag.sub{margin:0 0 12px; background:var(--blue-50); color:var(--blue-700); border-color:#bcdcf7;}
+  .modal-head .screen-tag{margin:0 0 0 8px; vertical-align:middle; font-size:11.5px; padding:2px 8px;}
+
+  .screen-indicator{
+    position:fixed; right:22px; bottom:22px; z-index:500; background:#17211d; color:#fff; border-radius:14px;
+    padding:12px 18px; box-shadow:0 10px 30px rgba(0,0,0,.28); cursor:pointer; text-align:center; min-width:150px;
+    user-select:none; border:1px solid rgba(255,255,255,.08); transition:transform .12s ease;
+  }
+  .screen-indicator:hover{transform:translateY(-2px);}
+  .screen-indicator:active{transform:translateY(0) scale(0.98);}
+  .si-label{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#9fd6c1;}
+  .si-code{font-family:'SFMono-Regular',Consolas,monospace; font-size:24px; font-weight:700; margin:3px 0; color:#fff;}
+  .si-hint{font-size:10.5px; color:#9fb0aa; display:flex; align-items:center; justify-content:center; gap:5px;}
+  h1.page-title{font-size:21px; font-weight:700; margin:0 0 3px;}
+  .page-sub{color:var(--ink-3); font-size:13.5px; margin:0 0 22px;}
+  .page-head{display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:22px; flex-wrap:wrap;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:7px; border-radius:var(--radius-sm); border:1px solid var(--line-2);
+    background:#fff; color:var(--ink); font-size:13px; font-weight:600; padding:9px 14px; cursor:pointer; font-family:inherit; white-space:nowrap;
+  }
+  .btn:hover{background:var(--bg);}
+  .btn.primary{background:var(--teal-600); border-color:var(--teal-600); color:#fff;}
+  .btn.primary:hover{background:var(--teal-700);}
+  .btn.danger{color:var(--red-700); border-color:#f2c9c9;}
+  .btn.danger:hover{background:var(--red-50);}
+  .btn.sm{padding:6px 10px; font-size:12px;}
+  .btn i{font-size:16px;}
+  .btn:disabled{opacity:.5; cursor:default;}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;}
+  .stat-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow-sm);}
+  .stat-card .label{font-size:12px; color:var(--ink-3); font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
+  .stat-card .value{font-size:25px; font-weight:700; margin-top:6px;}
+  .stat-card .delta{font-size:12px; margin-top:4px; color:var(--teal-600); font-weight:600;}
+  .stat-card .delta.warn{color:var(--amber-700);}
+
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; margin-bottom:18px;}
+  .panel-head{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); gap:12px; flex-wrap:wrap;}
+  .panel-head h3{font-size:15px; margin:0; font-weight:700;}
+  .panel-note{padding:12px 20px; background:var(--teal-50); color:var(--teal-700); font-size:12.5px; display:flex; gap:8px; align-items:flex-start;}
+  .panel-note.gray{background:var(--bg); color:var(--ink-2);}
+  .panel-note i{flex-shrink:0; margin-top:1px;}
+
+  .agenda-item{display:flex; align-items:center; gap:16px; padding:14px 20px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .agenda-item:last-child{border-bottom:none;}
+  .agenda-item:hover{background:var(--bg);}
+  .agenda-time{width:56px; flex-shrink:0; font-weight:700; font-size:13.5px; color:var(--ink);}
+  .agenda-time span{display:block; font-size:11px; font-weight:500; color:var(--ink-3);}
+  .agenda-avatar{width:38px; height:38px; border-radius:50%; background:var(--teal-50); color:var(--teal-700); font-weight:700; font-size:12.5px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .agenda-info{flex:1; min-width:0;}
+  .agenda-info .name{font-weight:600; font-size:14px; display:flex; align-items:center; gap:6px;}
+  .agenda-info .meta{font-size:12.5px; color:var(--ink-3); margin-top:1px;}
+  .agenda-actions{display:flex; gap:6px; flex-shrink:0;}
+
+  .badge{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap;}
+  .badge.ok{background:var(--teal-50); color:var(--teal-700);}
+  .badge.wait{background:var(--amber-50); color:var(--amber-700);}
+  .badge.info{background:var(--blue-50); color:var(--blue-700);}
+  .badge.off{background:#f1eeee; color:#6b6866;}
+  .badge.cancel{background:var(--red-50); color:var(--red-700);}
+  .badge.purple{background:var(--purple-50); color:var(--purple-700);}
+  .global-icon{color:var(--blue-500); font-size:13px; cursor:help;}
+
+  .cal-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+  .cal-col-head{font-size:12px; font-weight:700; color:var(--ink-2); text-align:center; padding-bottom:8px; text-transform:uppercase; letter-spacing:.03em;}
+  .cal-col-head .d{display:block; font-size:16px; font-weight:700; color:var(--ink); margin-top:2px;}
+  .cal-col{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); min-height:340px; padding:10px 8px; display:flex; flex-direction:column; gap:8px;}
+  .cal-slot{
+    background:var(--teal-50); border-left:3px solid var(--teal-500); border-radius:6px; padding:7px 9px; cursor:pointer; font-size:12px;
+  }
+  .cal-slot:hover{background:var(--teal-100);}
+  .cal-slot.wait{background:var(--amber-50); border-left-color:var(--amber-500);}
+  .cal-slot.done{background:#f1f3f2; border-left-color:#9aa4a0;}
+  .cal-slot .t{font-weight:700; font-size:11.5px;}
+  .cal-slot .n{font-weight:600; margin-top:1px;}
+  .cal-slot .p{color:var(--ink-3); font-size:11px;}
+  .cal-empty{border:1.5px dashed var(--line-2); border-radius:6px; flex:1; display:flex; align-items:center; justify-content:center; color:var(--ink-3); font-size:11.5px; min-height:38px;}
+
+  .waitlist-row{display:flex; align-items:center; gap:14px; padding:12px 20px; border-bottom:1px solid var(--line);}
+  .waitlist-row:last-child{border-bottom:none;}
+  .waitlist-icon{width:32px; height:32px; border-radius:50%; background:var(--amber-50); color:var(--amber-700); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+
+  table.tbl{width:100%; border-collapse:collapse;}
+  table.tbl th{text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-3); font-weight:700; padding:10px 20px; border-bottom:1px solid var(--line);}
+  table.tbl td{padding:12px 20px; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:middle;}
+  table.tbl tr:last-child td{border-bottom:none;}
+  table.tbl tr.rowlink{cursor:pointer;}
+  table.tbl tr.rowlink:hover{background:var(--bg);}
+  table.tbl tr.denied{background:var(--red-50);}
+  .name-cell{display:flex; align-items:center; gap:10px;}
+  .risk-dot{width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:5px;}
+  .risk-dot.high{background:var(--red-500);}
+  .risk-dot.med{background:var(--amber-500);}
+  .risk-dot.low{background:var(--teal-500);}
+  .stock-dot{width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:6px;}
+  .stock-dot.ok{background:var(--teal-500);}
+  .stock-dot.low{background:var(--red-500);}
+
+  .pd-head{display:flex; align-items:flex-start; gap:18px; margin-bottom:6px; flex-wrap:wrap;}
+  .pd-avatar{width:58px; height:58px; border-radius:50%; background:var(--teal-100); color:var(--teal-700); font-weight:700; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .pd-name{font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px;}
+  .pd-meta{color:var(--ink-3); font-size:13px; margin-top:3px; display:flex; gap:14px; flex-wrap:wrap;}
+  .pd-meta span{display:flex; align-items:center; gap:5px;}
+  .back-link{display:inline-flex; align-items:center; gap:6px; color:var(--ink-2); font-size:13px; font-weight:600; cursor:pointer; margin-bottom:16px; background:none; border:none; font-family:inherit; padding:0;}
+  .back-link:hover{color:var(--ink);}
+
+  .tabs{display:flex; gap:2px; border-bottom:1px solid var(--line); margin:20px 0 20px; overflow-x:auto;}
+  .tab{padding:10px 4px; margin-right:22px; font-size:13.5px; font-weight:600; color:var(--ink-3); cursor:pointer; border-bottom:2px solid transparent; background:none; border-top:none; border-left:none; border-right:none; font-family:inherit; white-space:nowrap;}
+  .tab.active{color:var(--teal-700); border-bottom-color:var(--teal-600);}
+  .tabview{display:none;}
+  .tabview.active{display:block;}
+
+  .info-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;}
+  .info-box{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .info-box h4{margin:0 0 10px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px;}
+  .tag{display:inline-block; background:var(--red-50); color:var(--red-700); font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:20px; margin:0 6px 6px 0;}
+  .tag.warn{background:var(--amber-50); color:var(--amber-700);}
+  .tag.neutral{background:var(--bg); color:var(--ink-2); border:1px solid var(--line-2);}
+  .note-line{font-size:13px; color:var(--ink-2); padding:6px 0; border-bottom:1px dashed var(--line); display:flex; justify-content:space-between; gap:10px;}
+  .note-line:last-child{border-bottom:none;}
+
+  .visit-row{display:flex; align-items:flex-start; gap:14px; padding:14px 20px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .visit-row:last-child{border-bottom:none;}
+  .visit-row:hover{background:var(--bg);}
+  .visit-row .ti-chevron-right{margin-left:auto; align-self:center; color:var(--ink-3); flex-shrink:0;}
+  .visit-dot{width:9px; height:9px; border-radius:50%; background:var(--teal-500); margin-top:5px; flex-shrink:0;}
+  .visit-dot.foreign{background:var(--blue-500);}
+  .visit-dot.noshow{background:var(--red-500);}
+  .visit-body{flex:1;}
+  .visit-date{font-size:12px; color:var(--ink-3); font-weight:600;}
+  .visit-title{font-weight:600; font-size:13.5px; margin-top:1px;}
+  .visit-tenant{font-size:12px; color:var(--ink-3); margin-top:2px;}
+  .locked-note{display:flex; align-items:center; gap:8px; padding:14px 20px; color:var(--ink-3); font-size:13px; font-style:italic;}
+
+  .grant-row{display:flex; align-items:center; gap:14px; padding:14px 20px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .grant-row:last-child{border-bottom:none;}
+  .grant-icon{width:36px; height:36px; border-radius:50%; background:var(--blue-50); color:var(--blue-700); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+  .grant-icon.you{background:var(--teal-50); color:var(--teal-700);}
+  .grant-body{flex:1; min-width:180px;}
+  .grant-title{font-weight:600; font-size:13.5px;}
+  .grant-meta{font-size:12px; color:var(--ink-3); margin-top:1px;}
+
+  .recall-hero{display:flex; align-items:center; gap:20px; padding:20px; background:var(--teal-50); border-radius:var(--radius); margin-bottom:16px; flex-wrap:wrap;}
+  .recall-num{font-size:30px; font-weight:700; color:var(--teal-700); line-height:1;}
+  .recall-num small{display:block; font-size:11px; font-weight:600; color:var(--teal-600); margin-top:3px; text-transform:uppercase;}
+
+  .msg-thread{display:flex; flex-direction:column; gap:10px; margin:12px 0;}
+  .msg{max-width:72%; padding:9px 13px; border-radius:12px; font-size:13px;}
+  .msg.in{background:var(--bg); align-self:flex-start; border-bottom-left-radius:3px;}
+  .msg.out{background:var(--teal-600); color:#fff; align-self:flex-end; border-bottom-right-radius:3px;}
+  .msg .mt{font-size:10.5px; opacity:.65; margin-top:3px;}
+  .msg-input{display:flex; gap:8px; margin-top:10px;}
+  .msg-input input{flex:1; border:1px solid var(--line-2); border-radius:20px; padding:9px 15px; font-size:13px; font-family:inherit; outline:none;}
+  .msg-input input:focus{border-color:var(--teal-500);}
+
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(15,30,26,.45); z-index:100; align-items:center; justify-content:center; padding:20px; overflow-y:auto;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff; border-radius:16px; width:480px; max-width:100%; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow-lg);}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--line);}
+  .modal-head h3{margin:0; font-size:16px; font-weight:700;}
+  .modal-close{border:none; background:none; font-size:20px; cursor:pointer; color:var(--ink-3); line-height:1;}
+  .modal-body{padding:20px 22px;}
+  .modal-foot{display:flex; justify-content:flex-end; gap:10px; padding:16px 22px; border-top:1px solid var(--line);}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-2);}
+  .field input, .field select, .field textarea{
+    width:100%; border:1px solid var(--line-2); border-radius:var(--radius-sm); padding:9px 11px; font-size:13.5px; font-family:inherit; outline:none; color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--teal-500);}
+  .field-row{display:flex; gap:12px;}
+  .field-row .field{flex:1;}
+  .field-note{font-size:11.5px; color:var(--ink-3); margin-top:5px;}
+  .newpatient-box{background:var(--bg); border:1px dashed var(--line-2); border-radius:var(--radius-sm); padding:12px; margin-bottom:14px; display:none;}
+  .newpatient-box.show{display:block;}
+
+  .modal.lg{width:640px;}
+  .form-section{margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--line);}
+  .form-section:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  .form-section h4{margin:0 0 3px; font-size:13.5px; font-weight:700; display:flex; align-items:center; gap:7px;}
+  .form-section .fs-sub{font-size:12px; color:var(--ink-3); margin:0 0 12px;}
+  .chip-check{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line-2); border-radius:20px; padding:6px 12px; font-size:12.5px; font-weight:500; cursor:pointer; margin:0 6px 6px 0; background:#fff; user-select:none;}
+  .chip-check input{margin:0;}
+  .chip-check.checked{background:var(--teal-50); border-color:var(--teal-500); color:var(--teal-700); font-weight:600;}
+  .psr-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:8px;}
+  .psr-box{border:1px solid var(--line-2); border-radius:var(--radius-sm); padding:9px 10px; background:var(--bg);}
+  .psr-box label{display:block; font-size:11px; font-weight:600; color:var(--ink-2); margin-bottom:5px;}
+  .psr-box .fdi{color:var(--ink-3); font-weight:500;}
+  .psr-box select{width:100%; padding:6px 8px; font-size:13px; border:1px solid var(--line-2); border-radius:6px; font-family:inherit;}
+  .psr-legend{font-size:11px; color:var(--ink-3); background:var(--bg); border-radius:6px; padding:8px 10px; line-height:1.6;}
+  .index-row{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .index-row label{width:190px; flex-shrink:0; font-size:12.5px; font-weight:600; color:var(--ink-2);}
+  .index-row input[type=range]{flex:1;}
+  .index-row .index-val{width:44px; text-align:right; font-weight:700; font-size:13px; flex-shrink:0;}
+  .recall-suggest{display:flex; align-items:center; gap:10px; background:var(--teal-50); border-radius:var(--radius-sm); padding:10px 12px; font-size:12.5px; color:var(--teal-700); margin-top:4px;}
+  .recall-suggest i{font-size:16px;}
+  .confirm-box{display:flex; align-items:flex-start; gap:9px; background:var(--bg); border-radius:var(--radius-sm); padding:12px; font-size:12.5px; color:var(--ink-2);}
+  .confirm-box input{margin-top:2px;}
+  .visit-extra{font-size:11.5px; color:var(--ink-3); margin-top:3px;}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px;
+    border-radius:10px; font-size:13.5px; font-weight:500; box-shadow:var(--shadow-lg); z-index:200; opacity:0; pointer-events:none; transition:all .25s ease; display:flex; align-items:center; gap:9px; max-width:90vw;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast i{color:var(--teal-400); font-size:17px; flex-shrink:0;}
+
+  .empty-note{text-align:center; padding:36px 20px; color:var(--ink-3);}
+  .empty-note i{font-size:30px; display:block; margin-bottom:8px; color:var(--line-2);}
+
+  .onboard-steps{display:flex; flex-direction:column; gap:0;}
+  .ostep{display:flex; gap:14px; padding:16px 0; border-bottom:1px solid var(--line);}
+  .ostep:last-child{border-bottom:none;}
+  .ostep-num{width:28px; height:28px; border-radius:50%; background:var(--teal-50); color:var(--teal-700); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .ostep-num.done{background:var(--teal-600); color:#fff;}
+  .ostep-title{font-weight:600; font-size:13.5px;}
+  .ostep-sub{font-size:12.5px; color:var(--ink-3); margin-top:2px;}
+
+  .star-row{color:var(--amber-500); font-size:13px; letter-spacing:1px;}
+  .review-row{padding:16px 20px; border-bottom:1px solid var(--line);}
+  .review-row:last-child{border-bottom:none;}
+  .review-head{display:flex; align-items:center; justify-content:between; gap:10px; margin-bottom:5px;}
+  .review-name{font-weight:600; font-size:13.5px;}
+  .review-date{font-size:12px; color:var(--ink-3); margin-left:auto;}
+  .review-text{font-size:13.5px; color:var(--ink-2); margin-top:4px;}
+
+  .phone-shell{width:320px; background:#0b1210; border-radius:36px; padding:12px; box-shadow:var(--shadow-lg);}
+  .phone-screen{background:#fff; border-radius:26px; overflow:hidden; min-height:540px; display:flex; flex-direction:column;}
+  .phone-header{padding:14px 16px 10px; font-weight:700; font-size:13.5px; display:flex; justify-content:space-between; align-items:center; background:var(--teal-600); color:#fff;}
+  .phone-header .modal-close{color:#fff;}
+  .phone-tabs{display:flex; border-bottom:1px solid var(--line);}
+  .ptab{flex:1; padding:10px 4px; font-size:11px; font-weight:600; color:var(--ink-3); background:none; border:none; cursor:pointer; font-family:inherit;}
+  .ptab.active{color:var(--teal-700); border-bottom:2px solid var(--teal-600);}
+  .ptabview{display:none; padding:14px 16px; overflow-y:auto; flex:1;}
+  .ptabview.active{display:block;}
+  .p-appt-card{background:var(--teal-50); border-radius:var(--radius-sm); padding:14px; margin-bottom:12px;}
+  .p-appt-card .d{font-size:11.5px; color:var(--teal-700); font-weight:700; text-transform:uppercase;}
+  .p-appt-card .t{font-size:15px; font-weight:700; margin-top:3px;}
+  .p-appt-card .s{font-size:12px; color:var(--ink-2); margin-top:2px;}
+  .p-appt-actions{display:flex; gap:8px; margin-top:10px;}
+  .phist{font-size:12.5px; color:var(--ink-2); padding:8px 0; border-bottom:1px dashed var(--line);}
+
+  @media(max-width:980px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .cal-grid{grid-template-columns:repeat(2,1fr); overflow-x:auto;}
+    .info-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Z</div>
+      <div class="brand-text"><b>ZubApp PMS</b><span>pro dentální hygienistky</span></div>
+    </div>
+
+    <div class="tenant-card">
+      <div class="name">Bc. Tereza Malá, DH</div>
+      <div class="role">Nezávislá praxe · Praha 6</div>
+      <div class="verify-pill ok" id="verifyPill"><i class="ti ti-shield-check"></i> Ověřeno</div>
+    </div>
+
+    <div class="navgroup-label" style="padding-top:4px">Provoz</div>
+    <nav class="navlist">
+      <button class="navitem active" data-view="agenda"><i class="ti ti-calendar-event"></i>Dnešní agenda</button>
+      <button class="navitem" data-view="kalendar"><i class="ti ti-calendar"></i>Kalendář</button>
+      <button class="navitem" data-view="pacienti"><i class="ti ti-users"></i>Pacienti</button>
+    </nav>
+
+    <div class="navgroup-label">Obchod</div>
+    <nav class="navlist">
+      <button class="navitem" data-view="fakturace"><i class="ti ti-receipt"></i>Fakturace</button>
+      <button class="navitem" data-view="sklad"><i class="ti ti-package"></i>Sklad<span class="badge-count red" id="skladBadge">3</span></button>
+      <button class="navitem" data-view="recenze"><i class="ti ti-star"></i>Recenze</button>
+    </nav>
+
+    <div class="navgroup-label">Compliance</div>
+    <nav class="navlist">
+      <button class="navitem" data-view="souhlasy"><i class="ti ti-shield-lock"></i>Souhlasy a přístupy</button>
+      <button class="navitem" data-view="audit"><i class="ti ti-list-search"></i>Auditní stopa</button>
+    </nav>
+
+    <div class="navgroup-label">Správa</div>
+    <nav class="navlist">
+      <button class="navitem" data-view="nastaveni"><i class="ti ti-settings"></i>Nastavení praxe<span class="badge-count" id="setupBadge" style="display:none">1</span></button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="demo-toggle" id="demoToggle"><i class="ti ti-flask" style="margin-right:5px"></i>Demo: přepnout na neověřený tenant</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="verify-banner" id="verifyBanner">
+      <i class="ti ti-alert-triangle"></i>
+      <span>Váš profil čeká na ověření odbornosti. Do dokončení máte omezený přístup — nelze zakládat nové pacienty ani přijímat platby.</span>
+      <button onclick="switchView('nastaveni')">Dokončit ověření</button>
+    </div>
+
+    <div class="topbar">
+      <div class="search"><i class="ti ti-search"></i><input type="text" id="globalSearch" placeholder="Hledat pacienta, rezervaci, fakturu..." oninput="filterPatients(this.value)"></div>
+      <div class="topbar-spacer"></div>
+      <button class="btn sm" onclick="openPatientPreview()"><i class="ti ti-device-mobile"></i>Pohled pacienta</button>
+      <div class="icon-btn" title="Zprávy"><i class="ti ti-message-circle"></i><span class="dot"></span></div>
+      <div class="icon-btn" title="Notifikace"><i class="ti ti-bell"></i></div>
+      <div class="avatar">TM</div>
+    </div>
+
+    <div class="content">
+
+      <!-- AGENDA -->
+      <div class="view active" id="view-agenda">
+        <div class="page-head">
+          <div>
+            <div class="screen-tag">S01</div>
+            <h1 class="page-title">Dnešní agenda</h1>
+            <p class="page-sub">Pátek 4. července 2026 · 8 rezervací</p>
+          </div>
+          <button class="btn primary" onclick="openBooking()"><i class="ti ti-plus"></i>Nová rezervace</button>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="label">Dnešní pacienti</div><div class="value">8</div><div class="delta">+2 oproti minulému pátku</div></div>
+          <div class="stat-card"><div class="label">V čekárně</div><div class="value">1</div></div>
+          <div class="stat-card"><div class="label">Tržby dnes</div><div class="value">4 200 Kč</div></div>
+          <div class="stat-card"><div class="label">Průměrné hodnocení</div><div class="value">4.8 <i class="ti ti-star" style="font-size:16px;color:var(--amber-500)"></i></div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Rozpis dne</h3><span style="font-size:12.5px;color:var(--ink-3)">Klikněte na pacienta pro detail</span></div>
+          <div id="agendaList"></div>
+        </div>
+      </div>
+
+      <!-- KALENDAR -->
+      <div class="view" id="view-kalendar">
+        <div class="page-head">
+          <div><div class="screen-tag">S02</div><h1 class="page-title">Kalendář</h1><p class="page-sub">30. června — 4. července 2026</p></div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn sm"><i class="ti ti-chevron-left"></i></button>
+            <button class="btn sm">Tento týden<i class="ti ti-chevron-right"></i></button>
+            <button class="btn primary" onclick="openBooking()"><i class="ti ti-plus"></i>Nová rezervace</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+
+        <div class="panel" style="margin-top:20px;">
+          <div class="panel-head"><h3><i class="ti ti-hourglass" style="font-size:15px; vertical-align:-2px"></i> Čekací listina</h3><span style="font-size:12.5px;color:var(--ink-3)">Nabídněte uvolněný termín automaticky</span></div>
+          <div id="waitlistBody"></div>
+        </div>
+      </div>
+
+      <!-- PACIENTI -->
+      <div class="view" id="view-pacienti">
+        <div class="page-head">
+          <div><div class="screen-tag">S03</div><h1 class="page-title">Pacienti</h1><p class="page-sub"><span id="patientCount">7</span> pacientů ve vaší péči</p></div>
+          <button class="btn primary" onclick="openBooking()"><i class="ti ti-user-plus"></i>Přidat pacienta</button>
+        </div>
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="label">Aktivní pacienti</div><div class="value">7</div></div>
+          <div class="stat-card"><div class="label">Se sdílenou historií</div><div class="value">3</div><div class="delta">globální identita napříč hygienistkami</div></div>
+          <div class="stat-card"><div class="label">Neomluvená absence (30 dní)</div><div class="value">1 <span style="font-size:13px;color:var(--ink-3)">(4 %)</span></div></div>
+        </div>
+        <div class="panel">
+          <table class="tbl">
+            <thead><tr><th>Pacient</th><th>Riziko</th><th>Poslední návštěva</th><th>Recall</th><th>Historie</th><th></th></tr></thead>
+            <tbody id="patientTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PATIENT DETAIL -->
+      <div class="view" id="view-detail">
+        <div class="screen-tag">S04</div>
+        <button class="back-link" onclick="switchView('pacienti')"><i class="ti ti-arrow-left"></i>Zpět na seznam pacientů</button>
+        <div class="pd-head">
+          <div class="pd-avatar" id="pdAvatar">JN</div>
+          <div>
+            <div class="pd-name" id="pdName">Jana Nováková <i class="ti ti-fingerprint global-icon" title="Globální identita napříč hygienistkami"></i></div>
+            <div class="pd-meta" id="pdMeta"></div>
+          </div>
+          <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn sm"><i class="ti ti-message-circle"></i>Zpráva</button>
+            <button class="btn sm" onclick="showToast('Export dat dle GDPR připraven ke stažení','ti-download')"><i class="ti ti-download"></i>Export dat (GDPR)</button>
+            <button class="btn sm primary" onclick="openBooking()"><i class="ti ti-calendar-plus"></i>Objednat</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="prehled" data-code="S04.1">Přehled</button>
+          <button class="tab" data-tab="vykony" data-code="S04.2">Provedené výkony</button>
+          <button class="tab" data-tab="plan" data-code="S04.3">Plán péče a souhlasy</button>
+          <button class="tab" data-tab="recall" data-code="S04.4">Recall plán</button>
+          <button class="tab" data-tab="pristupy" data-code="S04.5">Přístupy</button>
+          <button class="tab" data-tab="rezervace" data-code="S04.6">Rezervace a zprávy</button>
+        </div>
+
+        <div class="tabview active" id="tab-prehled">
+          <div class="screen-tag sub">S04.1 · Přehled</div>
+          <div class="panel-note gray" style="border-radius:8px; margin-bottom:14px;"><i class="ti ti-info-circle"></i>Nálezy zaznamenané hygienistkou jsou suspektní — definitivní diagnózu stanovuje zubní lékař (etický kodex ADH ČR, bod 3.1).</div>
+          <div class="info-grid">
+            <div class="info-box">
+              <h4><i class="ti ti-alert-circle" style="color:var(--red-500)"></i>Rizikové faktory a alergie</h4>
+              <div id="pdTags"></div>
+            </div>
+            <div class="info-box">
+              <h4><i class="ti ti-notes"></i>Poznámky z anamnézy</h4>
+              <div id="pdNotes"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabview" id="tab-vykony">
+          <div class="screen-tag sub">S04.2 · Provedené výkony</div>
+          <div class="panel">
+            <div class="panel-head"><h3>Provedené výkony</h3><button class="btn sm primary" onclick="openRecordModal()"><i class="ti ti-clipboard-plus"></i>Vložit záznam z výkonu</button></div>
+            <div id="pdVisits"></div>
+          </div>
+        </div>
+
+        <div class="tabview" id="tab-plan">
+          <div class="screen-tag sub">S04.3 · Plán péče a souhlasy</div>
+          <div class="panel">
+            <div class="panel-head"><h3>Navržený plán péče</h3><button class="btn sm"><i class="ti ti-plus"></i>Přidat výkon do plánu</button></div>
+            <div class="panel-note gray"><i class="ti ti-info-circle"></i>Individuální léčebný plán dentální hygieny v mezích léčebného postupu stanoveného zubním lékařem (kompetence 1.12).</div>
+            <div id="pdPlan"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Informovaný souhlas</h3></div>
+            <div style="padding:16px 20px;" id="pdConsent"></div>
+          </div>
+        </div>
+
+        <div class="tabview" id="tab-recall">
+          <div class="screen-tag sub">S04.4 · Recall plán</div>
+          <div class="recall-hero">
+            <div class="recall-num" id="recallNum">8<small>týdnů do dalšího recallu</small></div>
+            <div>
+              <div style="font-weight:600; font-size:14px;" id="recallText">Doporučeno: dentální hygiena + kontrola za 2 měsíce</div>
+              <div style="font-size:12.5px; color:var(--teal-700); margin-top:3px;" id="recallRisk">Parodontální riziko: střední — kratší interval než standardních 6 měsíců</div>
+            </div>
+          </div>
+          <button class="btn"><i class="ti ti-calendar-plus"></i>Naplánovat recall rezervaci</button>
+        </div>
+
+        <div class="tabview" id="tab-pristupy">
+          <div class="screen-tag sub">S04.5 · Přístupy</div>
+          <div class="panel"><div id="pdGrants"></div></div>
+          <div style="margin-top:14px;">
+            <button class="btn" onclick="showToast('Odkaz na udělení souhlasu odeslán pacientovi', 'ti-send')"><i class="ti ti-share"></i>Vyžádat nový souhlas od pacienta</button>
+          </div>
+        </div>
+
+        <div class="tabview" id="tab-rezervace">
+          <div class="screen-tag sub">S04.6 · Rezervace a zprávy</div>
+          <div class="panel">
+            <div class="panel-head"><h3>Poslední rezervace</h3></div>
+            <div class="visit-row">
+              <div class="visit-dot"></div>
+              <div class="visit-body">
+                <div class="visit-date">Dnes, 10:30 · Dentální hygiena + Airflow</div>
+                <div class="msg-thread">
+                  <div class="msg in">Dobrý den, mohu dorazit o 10 minut dříve?<div class="mt">9:12</div></div>
+                  <div class="msg out">Ano, bez problému, budu připravena.<div class="mt">9:15</div></div>
+                </div>
+                <div class="msg-input"><input type="text" placeholder="Napsat zprávu k této rezervaci..."><button class="btn sm primary" onclick="showToast('Zpráva odeslána','ti-send')">Odeslat</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAKTURACE -->
+      <div class="view" id="view-fakturace">
+        <div class="page-head">
+          <div><div class="screen-tag">S05</div><h1 class="page-title">Fakturace</h1><p class="page-sub">Přímá platba pacientem — bez napojení na zdravotní pojišťovnu</p></div>
+          <button class="btn primary" onclick="openInvoice()"><i class="ti ti-plus"></i>Vystavit fakturu</button>
+        </div>
+
+        <div class="panel-note gray"><i class="ti ti-info-circle"></i>Nezávislá hygienistka nemá smluvní vztah se zdravotní pojišťovnou — fakturace probíhá přímo pacientovi (hotově, kartou nebo převodem). Napojení na pojišťovny je mimo rozsah fáze 1 (viz ZUB-87).</div>
+
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="label">Tržby tento měsíc</div><div class="value">38 900 Kč</div><div class="delta">+12 % oproti minulému měsíci</div></div>
+          <div class="stat-card"><div class="label">Nezaplacené faktury</div><div class="value">1</div><div class="delta warn">700 Kč po splatnosti</div></div>
+          <div class="stat-card"><div class="label">Průměrná faktura</div><div class="value">975 Kč</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Ceník výkonů</h3><button class="btn sm"><i class="ti ti-edit"></i>Upravit ceník</button></div>
+          <div class="panel-note gray"><i class="ti ti-info-circle"></i>Základní typy návštěv dle profesního standardu ADH ČR + doplňkové výkony.</div>
+          <table class="tbl"><thead><tr><th>Výkon</th><th>Orientační trvání</th><th>Cena</th></tr></thead><tbody id="priceListBody"></tbody></table>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Faktury a platby</h3></div>
+          <table class="tbl"><thead><tr><th>Faktura</th><th>Pacient</th><th>Výkon</th><th>Částka</th><th>Způsob</th><th>Stav</th></tr></thead><tbody id="invoiceBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- SKLAD -->
+      <div class="view" id="view-sklad">
+        <div class="page-head">
+          <div><div class="screen-tag">S06</div><h1 class="page-title">Sklad materiálu</h1><p class="page-sub">Spotřební materiál pro dentální hygienu</p></div>
+          <button class="btn primary" onclick="showToast('Objednávka odeslána dodavateli','ti-truck-delivery')"><i class="ti ti-plus"></i>Nová objednávka</button>
+        </div>
+        <div class="panel">
+          <table class="tbl"><thead><tr><th>Materiál</th><th>Aktuální stav</th><th>Minimální zásoba</th><th>Stav</th><th></th></tr></thead><tbody id="inventoryBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- RECENZE -->
+      <div class="view" id="view-recenze">
+        <div class="page-head">
+          <div><div class="screen-tag">S07</div><h1 class="page-title">Recenze a hodnocení</h1><p class="page-sub">Hodnocení se automaticky vyžádá po dokončené návštěvě</p></div>
+          <button class="btn"><i class="ti ti-send"></i>Požádat o hodnocení ručně</button>
+        </div>
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="label">Průměrné hodnocení</div><div class="value">4.8 <i class="ti ti-star" style="font-size:16px;color:var(--amber-500)"></i></div></div>
+          <div class="stat-card"><div class="label">Počet hodnocení</div><div class="value">24</div></div>
+          <div class="stat-card"><div class="label">Míra odezvy</div><div class="value">67 %</div></div>
+        </div>
+        <div class="panel"><div id="reviewsBody"></div></div>
+      </div>
+
+      <!-- SOUHLASY -->
+      <div class="view" id="view-souhlasy">
+        <div class="page-head">
+          <div><div class="screen-tag">S08</div><h1 class="page-title">Souhlasy a přístupy</h1><p class="page-sub">Kdo má přístup k dokumentaci vašich pacientů — a ke komu máte přístup vy</p></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Přístup udělený vaší praxi jinými hygienisty</h3></div>
+          <div class="grant-row">
+            <div class="grant-icon you"><i class="ti ti-lock-open"></i></div>
+            <div class="grant-body">
+              <div class="grant-title">Jana Nováková — od Mgr. Petry Sedláčkové (Brno)</div>
+              <div class="grant-meta">Rozsah: celá dokumentace · Platnost: do odvolání · Uděleno 12. 5. 2026</div>
+            </div>
+            <span class="badge ok">Aktivní</span>
+          </div>
+          <div class="grant-row">
+            <div class="grant-icon you"><i class="ti ti-lock-open"></i></div>
+            <div class="grant-body">
+              <div class="grant-title">Marek Beneš — od DentaCentrum Vinohrady</div>
+              <div class="grant-meta">Rozsah: jen parodontální nálezy · Platnost: do 30. 9. 2026 · Uděleno 2. 3. 2026</div>
+            </div>
+            <span class="badge ok">Aktivní</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Přístup, který jste udělili jiným praxím</h3></div>
+          <div class="grant-row">
+            <div class="grant-icon"><i class="ti ti-building-hospital"></i></div>
+            <div class="grant-body">
+              <div class="grant-title">Lucie Horáková → MUDr. Filip Novotný (zubní ordinace)</div>
+              <div class="grant-meta">Rozsah: celá dokumentace · Platnost: dočasná, do 1. 8. 2026</div>
+            </div>
+            <button class="btn sm danger" onclick="revokeGrant(this)">Odvolat</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="view" id="view-audit">
+        <div class="page-head">
+          <div><div class="screen-tag">S09</div><h1 class="page-title">Auditní stopa</h1><p class="page-sub">Append-only log přístupů ke zdravotním datům (GDPR čl. 9 a čl. 30)</p></div>
+        </div>
+        <div class="panel-note gray"><i class="ti ti-shield-lock"></i>Každý přístup kombinuje členství v tenantu (provozní data) a platný souhlas pacienta (dokumentace) — viz ZUB-49. Odepřené pokusy jsou zvýrazněny.</div>
+        <div class="panel">
+          <table class="tbl"><thead><tr><th>Čas</th><th>Kdo přistoupil</th><th>K čemu</th><th>Akce</th><th>Právní základ</th></tr></thead><tbody id="auditBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- NASTAVENI -->
+      <div class="view" id="view-nastaveni">
+        <div class="page-head">
+          <div><div class="screen-tag">S10</div><h1 class="page-title">Nastavení praxe</h1><p class="page-sub">Ověření odbornosti, tým a fakturační údaje</p></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Stav ověření</h3></div>
+          <div style="padding:18px 20px;">
+            <div class="onboard-steps">
+              <div class="ostep">
+                <div class="ostep-num done"><i class="ti ti-check"></i></div>
+                <div><div class="ostep-title">Registrace entity dokončena</div><div class="ostep-sub">Samoobslužná registrace tenantu — 3. 4. 2026</div></div>
+              </div>
+              <div class="ostep">
+                <div class="ostep-num done"><i class="ti ti-check"></i></div>
+                <div><div class="ostep-title">Doklad o odbornosti nahrán</div><div class="ostep-sub">Diplom + osvědčení o registraci dentální hygienistky</div></div>
+              </div>
+              <div class="ostep" id="verifyStep">
+                <div class="ostep-num done" id="verifyStepIcon"><i class="ti ti-check"></i></div>
+                <div><div class="ostep-title" id="verifyStepTitle">Ověřeno platformou</div><div class="ostep-sub" id="verifyStepSub">Ověřeno proti registru České komory zubních techniků a dentálních hygienistek, č. registrace DH-2024-0532 · aktivováno 5. 4. 2026</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Indikující a dohlížející zubní lékař</h3><button class="btn sm"><i class="ti ti-edit"></i>Upravit</button></div>
+          <div class="panel-note gray"><i class="ti ti-info-circle"></i>Odborný dohled zubního lékaře nevyžaduje jeho fyzickou přítomnost v ordinaci — lékař musí být jen dostupný pro pomoc a indikaci na dálku (stanovisko ČSK ZS 1/2020). Vyžadují ho výkony jako povrchová anestezie, bělení zubů, RTG snímky nebo pečetění fisur.</div>
+          <div class="grant-row">
+            <div class="grant-icon"><i class="ti ti-stethoscope"></i></div>
+            <div class="grant-body"><div class="grant-title">MUDr. Kateřina Bártová</div><div class="grant-meta">Indikující zubní lékařka · +420 602 XXX XXX · dostupná na dálku telefonicky / přes zprávy v appce</div></div>
+            <span class="badge ok">Aktivní vazba</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Členové týmu</h3><button class="btn sm"><i class="ti ti-user-plus"></i>Pozvat kolegyni</button></div>
+          <div class="grant-row">
+            <div class="grant-icon you"><i class="ti ti-user"></i></div>
+            <div class="grant-body"><div class="grant-title">Bc. Tereza Malá</div><div class="grant-meta">Správkyně tenantu</div></div>
+            <span class="badge ok">Vy</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Předplatné</h3></div>
+          <div style="padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <div style="font-weight:600; font-size:14px;">Plán Sólo praxe</div>
+              <div style="font-size:12.5px; color:var(--ink-3); margin-top:2px;">399 Kč / měsíc · další fakturace 1. 8. 2026</div>
+            </div>
+            <button class="btn sm">Změnit plán</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Nová rezervace <span class="screen-tag">M01</span></h3><button class="modal-close" onclick="closeBooking()">&times;</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Pacient</label>
+        <select id="bkPatient" onchange="toggleNewPatient(this.value)">
+          <option>Jana Nováková</option>
+          <option>Petr Svoboda</option>
+          <option>Anna Dvořáková (rezervuje Marie Dvořáková)</option>
+          <option>Tomáš Král</option>
+          <option>Lucie Horáková</option>
+          <option>Marek Beneš</option>
+          <option>Eva Procházková</option>
+          <option value="novy">+ Nový pacient</option>
+        </select>
+      </div>
+
+      <div class="newpatient-box" id="newPatientBox">
+        <div class="field" style="margin-bottom:10px;">
+          <label>Jméno a příjmení / zákonný zástupce</label>
+          <input type="text" placeholder="Jméno pacienta (nebo rodiče, jde-li o dítě)">
+        </div>
+        <div class="field-row" style="margin-bottom:10px;">
+          <div class="field"><label>Datum narození</label><input type="date"></div>
+          <div class="field"><label>Způsob ověření totožnosti</label>
+            <select><option>Občanský průkaz</option><option>Cestovní pas</option><option>Bankovní identita (BankID)</option></select>
+          </div>
+        </div>
+        <div class="field-note"><i class="ti ti-fingerprint"></i> Ověření totožnosti zamezí vzniku duplicitní globální identity napříč hygienistkami (viz ZUB-53/ZUB-84).</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>Datum</label><input type="date" value="2026-07-07"></div>
+        <div class="field"><label>Čas</label><input type="time" value="09:00"></div>
+      </div>
+      <div class="field">
+        <label>Typ návštěvy <span style="font-weight:400; color:var(--ink-3)">(dle profesního standardu ADH ČR)</span></label>
+        <select id="bkVisitType" onchange="updateBookingDuration(this.value)">
+          <option value="vstupni" data-trvani="15–30 min">Vstupní vyšetření (15–30 min)</option>
+          <option value="zakladni" data-trvani="40–50 min" selected>Základní čištění (40–50 min)</option>
+          <option value="rozsirene" data-trvani="5–15 min / zub">Rozšířené/hloubkové čištění (5–15 min / zub)</option>
+          <option value="recall" data-trvani="60 min">Recall / udržovací fáze (60 min)</option>
+        </select>
+        <div class="field-note" id="bkVisitNote">Indikace: zdravý pacient nebo pacient po přerušení recallu.</div>
+      </div>
+      <div class="field">
+        <label>Doplňkové výkony</label>
+        <label class="chip-check"><input type="checkbox" onchange="toggleChip(this)">Fluoridace</label>
+        <label class="chip-check"><input type="checkbox" onchange="toggleChip(this)">Instruktáž ústní hygieny</label>
+        <label class="chip-check"><input type="checkbox" onchange="toggleChip(this)">Otisky chrupu</label>
+        <label class="chip-check"><input type="checkbox" onchange="toggleChip(this)">Bělení zubů <i class="ti ti-user-shield" style="font-size:12px" title="Vyžaduje dohled zubního lékaře"></i></label>
+        <label class="chip-check"><input type="checkbox" onchange="toggleChip(this)">Pečetění fisur <i class="ti ti-user-shield" style="font-size:12px" title="Vyžaduje vedení zubního lékaře"></i></label>
+        <div class="field-note"><i class="ti ti-user-shield" style="font-size:12px"></i> = výkon vyžadující indikaci/dohled zubního lékaře (vyhláška č. 55/2011 Sb.)</div>
+      </div>
+      <div class="field"><label>Poznámka</label><textarea rows="3" placeholder="Nepovinná poznámka k rezervaci..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeBooking()">Zrušit</button>
+      <button class="btn primary" onclick="confirmBooking()"><i class="ti ti-check"></i>Vytvořit rezervaci</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div class="modal-overlay" id="invoiceModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Vystavit fakturu <span class="screen-tag">M02</span></h3><button class="modal-close" onclick="closeInvoice()">&times;</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Pacient</label>
+        <select><option>Jana Nováková</option><option>Petr Svoboda</option><option>Tomáš Král</option><option>Lucie Horáková</option><option>Marek Beneš</option><option>Eva Procházková</option></select>
+      </div>
+      <div class="field">
+        <label>Výkon</label>
+        <select id="invProcedure" onchange="updateInvoiceTotal()">
+          <option data-cena="600">Vstupní vyšetření — 600 Kč</option>
+          <option data-cena="900">Základní čištění — 900 Kč</option>
+          <option data-cena="650">Rozšířené/hloubkové čištění (kvadrant) — 650 Kč</option>
+          <option data-cena="800">Recall / udržovací fáze — 800 Kč</option>
+          <option data-cena="500">Airflow — 500 Kč</option>
+          <option data-cena="300">Fluoridace — 300 Kč</option>
+          <option data-cena="350">Instruktáž ústní hygieny — 350 Kč</option>
+          <option data-cena="1800">Bělení zubů (pod dohledem ZL) — 1800 Kč</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Způsob platby</label><select><option>Kartou</option><option>Hotově</option><option>Bankovní převod</option></select></div>
+        <div class="field"><label>Celková částka</label><input type="text" id="invTotal" value="900 Kč" readonly></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeInvoice()">Zrušit</button>
+      <button class="btn primary" onclick="confirmInvoice()"><i class="ti ti-check"></i>Vystavit a odeslat</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLINICAL RECORD MODAL -->
+<div class="modal-overlay" id="recordModal">
+  <div class="modal lg">
+    <div class="modal-head">
+      <h3>Nový záznam z výkonu — <span id="recPatientName">pacient</span> <span class="screen-tag">M03</span></h3>
+      <button class="modal-close" onclick="closeRecordModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section">
+        <h4><i class="ti ti-calendar-event"></i>Základní údaje</h4>
+        <div class="field-row">
+          <div class="field"><label>Datum výkonu</label><input type="date" id="recDatum" value="2026-07-04"></div>
+          <div class="field"><label>Typ návštěvy</label>
+            <select id="recVisitType" onchange="onRecordVisitTypeChange()">
+              <option value="vstupni" data-trvani="15–30 min">Vstupní vyšetření</option>
+              <option value="zakladni" data-trvani="40–50 min" selected>Základní čištění</option>
+              <option value="rozsirene" data-trvani="5–15 min/zub">Rozšířené/hloubkové čištění</option>
+              <option value="recall" data-trvani="60 min">Recall / udržovací fáze</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Trvání</label><input type="text" id="recTrvani" value="40–50 min"></div>
+        <div id="recPreviousCompare"></div>
+        <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-2);">Doplňkové výkony provedené v rámci návštěvy</label>
+        <div id="recTypChips">
+          <label class="chip-check"><input type="checkbox" value="Airflow" onchange="toggleChip(this)">Airflow</label>
+          <label class="chip-check"><input type="checkbox" value="Fluoridace" onchange="toggleChip(this)">Fluoridace</label>
+          <label class="chip-check"><input type="checkbox" value="Instruktáž ústní hygieny" onchange="toggleChip(this)">Instruktáž ústní hygieny</label>
+          <label class="chip-check"><input type="checkbox" value="Otisky chrupu" onchange="toggleChip(this)">Otisky chrupu</label>
+          <label class="chip-check"><input type="checkbox" value="Povrchová anestezie" onchange="toggleChip(this)">Povrchová anestezie <i class="ti ti-user-shield" style="font-size:12px"></i></label>
+          <label class="chip-check"><input type="checkbox" value="Bělení zubů" onchange="toggleChip(this)">Bělení zubů <i class="ti ti-user-shield" style="font-size:12px"></i></label>
+        </div>
+        <div class="field-note"><i class="ti ti-user-shield" style="font-size:12px"></i> = vyžaduje indikaci/dohled zubního lékaře (vyhláška č. 55/2011 Sb.) — nelze provést zcela samostatně</div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-face-id"></i>Extraorální a intraorální vyšetření</h4>
+        <p class="fs-sub">Dle profesního standardu ADH ČR, kap. 4.1 — zejména při vstupním vyšetření a recallu</p>
+        <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--ink-2);">Extraorální nález</label>
+        <div id="recExtraChips">
+          <label class="chip-check"><input type="checkbox" value="Obličej/krk bez nálezu" onchange="toggleChip(this)" checked>Obličej/krk bez nálezu</label>
+          <label class="chip-check"><input type="checkbox" value="Ústní dýchání / parafunkce" onchange="toggleChip(this)">Ústní dýchání / parafunkce</label>
+          <label class="chip-check"><input type="checkbox" value="Zvětšené mízní uzliny" onchange="toggleChip(this)">Zvětšené mízní uzliny</label>
+          <label class="chip-check"><input type="checkbox" value="Nález na čelistním kloubu (TMJ)" onchange="toggleChip(this)">Nález na čelistním kloubu (TMJ)</label>
+        </div>
+        <label style="display:block; font-size:12px; font-weight:600; margin:12px 0 6px; color:var(--ink-2);">Intraorální nález</label>
+        <div id="recIntraChips">
+          <label class="chip-check"><input type="checkbox" value="Sliznice a jazyk bez nálezu" onchange="toggleChip(this)" checked>Sliznice a jazyk bez nálezu</label>
+          <label class="chip-check"><input type="checkbox" value="Foetor ex ore" onchange="toggleChip(this)">Foetor ex ore</label>
+          <label class="chip-check"><input type="checkbox" value="Hnisavá exsudace" onchange="toggleChip(this)">Hnisavá exsudace</label>
+          <label class="chip-check"><input type="checkbox" value="Mobilita zubů" onchange="toggleChip(this)">Mobilita zubů</label>
+          <label class="chip-check"><input type="checkbox" value="Postižení furkací" onchange="toggleChip(this)">Postižení furkací</label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-dental"></i>Parodontální screening (PSR / CPITN)</h4>
+        <p class="fs-sub">Šest sextantů, kód 0–4 dle nejzávažnějšího nálezu v sextantu (sondovaná hloubka na 4–6 místech/zub)</p>
+        <div class="psr-grid" id="psrGrid"></div>
+        <div class="psr-legend">0 zdravé dásně · 1 krvácení při sondáži · 2 zubní kámen / defektní výplň · 3 chobotek 4–5 mm · 4 chobotek &gt;5 mm</div>
+        <div id="deepScalingBox" style="display:none; margin-top:10px;">
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--ink-2);">Hloubkové ošetření (deep scaling + root planing) provedeno v sextantech</label>
+          <div id="deepScalingChips"></div>
+        </div>
+        <div class="recall-suggest" id="recallSuggestBox"><i class="ti ti-bulb"></i><span id="recallSuggestText">Doporučený recall se dopočítá podle zadaného PSR nálezu.</span></div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-chart-bar"></i>Indexy hygieny</h4>
+        <div class="index-row">
+          <label>Plak index (%)</label>
+          <input type="range" min="0" max="100" value="18" id="recPlak" oninput="document.getElementById('recPlakVal').textContent=this.value+' %'">
+          <span class="index-val" id="recPlakVal">18 %</span>
+        </div>
+        <div class="index-row">
+          <label>Krvácení při sondáži — BOP (%)</label>
+          <input type="range" min="0" max="100" value="12" id="recBop" oninput="document.getElementById('recBopVal').textContent=this.value+' %'">
+          <span class="index-val" id="recBopVal">12 %</span>
+        </div>
+        <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-2);">Zubní kámen</label>
+        <div id="recKamenChips">
+          <label class="chip-check"><input type="checkbox" value="Naddásňový" onchange="toggleChip(this)">Naddásňový</label>
+          <label class="chip-check"><input type="checkbox" value="Poddásňový" onchange="toggleChip(this)">Poddásňový</label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-stethoscope"></i>Stav měkkých tkání</h4>
+        <div id="recSoftTissueChips">
+          <label class="chip-check"><input type="checkbox" value="Zarudnutí" onchange="toggleChip(this)">Zarudnutí</label>
+          <label class="chip-check"><input type="checkbox" value="Otok" onchange="toggleChip(this)">Otok</label>
+          <label class="chip-check"><input type="checkbox" value="Recesy dásní" onchange="toggleChip(this)">Recesy dásní</label>
+          <label class="chip-check"><input type="checkbox" value="Afty / léze sliznice" onchange="toggleChip(this)">Afty / léze sliznice</label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-package"></i>Použitý materiál</h4>
+        <div id="recMaterialChips">
+          <label class="chip-check"><input type="checkbox" value="Ultrazvukový scaler" onchange="toggleChip(this)" checked>Ultrazvukový scaler</label>
+          <label class="chip-check"><input type="checkbox" value="Airflow prášek (bikarbonát)" onchange="toggleChip(this)">Airflow prášek (bikarbonát)</label>
+          <label class="chip-check"><input type="checkbox" value="Fluoridový gel" onchange="toggleChip(this)">Fluoridový gel</label>
+          <label class="chip-check"><input type="checkbox" value="Jednorázové kartáčky" onchange="toggleChip(this)">Jednorázové kartáčky</label>
+        </div>
+        <div class="field-note"><i class="ti ti-link"></i> Spotřeba se po uložení odečte ze skladu materiálu.</div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-list-check"></i>Doporučení pro pacienta</h4>
+        <div id="recRecommendChips">
+          <label class="chip-check"><input type="checkbox" value="Mezizubní kartáčky" onchange="toggleChip(this)" checked>Mezizubní kartáčky</label>
+          <label class="chip-check"><input type="checkbox" value="Ústní voda s chlorhexidinem" onchange="toggleChip(this)">Ústní voda s chlorhexidinem</label>
+          <label class="chip-check"><input type="checkbox" value="Přechod na elektrický kartáček" onchange="toggleChip(this)">Přechod na elektrický kartáček</label>
+          <label class="chip-check"><input type="checkbox" value="Úprava techniky čištění (Bassova metoda)" onchange="toggleChip(this)">Úprava techniky čištění (Bassova metoda)</label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-notes"></i>Suspektní nález a poznámka hygienistky</h4>
+        <p class="fs-sub">Dentální hygienistka stanovuje jen suspektní nález — definitivní diagnózu určuje zubní lékař (etický kodex ADH ČR, bod 3.1)</p>
+        <div class="field"><textarea rows="3" id="recPoznamka" placeholder="Volná poznámka k nálezu, reakce pacienta, doporučení k dalšímu sledování...">Pacient dobře snáší ošetření, bez komplikací. Suspektní gingivitida v oblasti dolního předního sextantu — doporučeno sledovat.</textarea></div>
+        <div class="confirm-box" style="margin-top:10px;">
+          <input type="checkbox" id="recInformZL" checked>
+          <label for="recInformZL">Informovat ošetřujícího/indikujícího zubního lékaře o výsledku ošetření (dle kompetence 1.18)</label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4><i class="ti ti-calendar-plus"></i>Doporučený recall</h4>
+        <select id="recRecallOverride" style="width:100%; border:1px solid var(--line-2); border-radius:8px; padding:9px 11px; font-size:13.5px; font-family:inherit;">
+          <option value="1">za 1 měsíc</option>
+          <option value="2">za 2 měsíce</option>
+          <option value="3">za 3 měsíce</option>
+          <option value="4">za 4 měsíce</option>
+          <option value="6" selected>za 6 měsíců</option>
+          <option value="9">za 9 měsíců</option>
+          <option value="12">za 12 měsíců</option>
+        </select>
+        <div class="field-note">Individuální interval 1–12 měsíců dle profesního standardu, předvyplněno dle PSR nálezu výše.</div>
+      </div>
+
+      <div class="form-section">
+        <div class="confirm-box">
+          <input type="checkbox" id="recConfirm">
+          <label for="recConfirm">Potvrzuji správnost záznamu. Po uložení se záznam uzamkne proti úpravám (append-only, GDPR čl. 9 auditní stopa) — případná oprava se zapíše jako nový dodatek.</label>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeRecordModal()">Zrušit</button>
+      <button class="btn primary" onclick="confirmRecord()"><i class="ti ti-lock"></i>Uložit a uzamknout záznam</button>
+    </div>
+  </div>
+</div>
+
+<!-- VISIT DETAIL MODAL -->
+<div class="modal-overlay" id="visitDetailModal">
+  <div class="modal lg">
+    <div class="modal-head">
+      <h3>Detail výkonu <span class="screen-tag">M05</span></h3>
+      <button class="modal-close" onclick="closeVisitDetail()">&times;</button>
+    </div>
+    <div class="modal-body" id="vdBody"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeVisitDetail()">Zavřít</button>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT PREVIEW (phone) -->
+<div class="modal-overlay" id="patientPreviewModal">
+  <div class="phone-shell">
+    <div class="phone-screen">
+      <div class="phone-header">
+        <span><i class="ti ti-device-mobile" style="margin-right:6px"></i>Pohled pacienta — Jana Nováková <span class="screen-tag" style="background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.35); color:#fff;">M04</span></span>
+        <button class="modal-close" onclick="closePatientPreview()">&times;</button>
+      </div>
+      <div class="phone-tabs">
+        <button class="ptab active" data-ptab="rezervace" data-code="M04.1">Rezervace</button>
+        <button class="ptab" data-ptab="karta" data-code="M04.2">Moje karta</button>
+        <button class="ptab" data-ptab="sdilet" data-code="M04.3">Sdílet přístup</button>
+      </div>
+
+      <div class="ptabview active" id="ptab-rezervace">
+        <div class="screen-tag sub">M04.1 · Rezervace</div>
+        <div class="p-appt-card">
+          <div class="d">Dnes · 10:30</div>
+          <div class="t">Dentální hygiena + Airflow</div>
+          <div class="s">Bc. Tereza Malá, DH · Praha 6</div>
+          <div class="p-appt-actions">
+            <button class="btn sm" onclick="showToast('Termín přesunut','ti-calendar')">Přesunout</button>
+            <button class="btn sm danger" onclick="showToast('Rezervace zrušena','ti-x')">Zrušit</button>
+          </div>
+        </div>
+        <div style="font-size:11.5px; color:var(--ink-3); font-weight:700; text-transform:uppercase; margin:14px 0 4px;">Historie</div>
+        <div class="phist">15. 1. 2026 · Parodontologické vyšetření — vaše praxe</div>
+        <div class="phist">3. 9. 2025 · Dentální hygiena — Mgr. Petra Sedláčková, Brno</div>
+      </div>
+
+      <div class="ptabview" id="ptab-karta">
+        <div class="screen-tag sub">M04.2 · Moje karta</div>
+        <div style="font-size:11.5px; color:var(--ink-3); font-weight:700; text-transform:uppercase; margin-bottom:6px;">Alergie a rizika</div>
+        <span class="tag warn">Bruxismus</span><span class="tag neutral">Bez alergií</span>
+        <div style="font-size:11.5px; color:var(--ink-3); font-weight:700; text-transform:uppercase; margin:16px 0 6px;">Doporučený recall</div>
+        <div style="background:var(--teal-50); border-radius:var(--radius-sm); padding:10px 12px; font-size:12.5px; color:var(--teal-700);">Další návštěva doporučena za 8 týdnů (parodontální riziko: střední)</div>
+        <div style="font-size:11.5px; color:var(--ink-3); font-weight:700; text-transform:uppercase; margin:16px 0 6px;">Globální identita</div>
+        <div style="font-size:12.5px; color:var(--ink-2);">PAT-20481 — vaše karta je jedna, i když navštívíte jinou hygienistku.</div>
+      </div>
+
+      <div class="ptabview" id="ptab-sdilet">
+        <div class="screen-tag sub">M04.3 · Sdílet přístup</div>
+        <div style="font-size:11.5px; color:var(--ink-3); font-weight:700; text-transform:uppercase; margin-bottom:8px;">Kdo má přístup</div>
+        <div style="font-size:12.5px; padding:8px 0; border-bottom:1px dashed var(--line);">Bc. Tereza Malá (aktuální) — celá dokumentace</div>
+        <div style="font-size:12.5px; padding:8px 0; border-bottom:1px dashed var(--line);">Mgr. Petra Sedláčková, Brno — do odvolání</div>
+        <div style="font-size:11.5px; color:var(--ink-3); font-weight:700; text-transform:uppercase; margin:16px 0 8px;">Udělit nový přístup</div>
+        <div class="field" style="margin-bottom:8px;"><input type="text" placeholder="Jméno hygienistky nebo kód praxe"></div>
+        <div class="field-row" style="margin-bottom:8px;">
+          <div class="field"><select><option>Celá dokumentace</option><option>Jen vybrané typy</option></select></div>
+          <div class="field"><select><option>Do odvolání</option><option>Dočasně (3 měsíce)</option></select></div>
+        </div>
+        <button class="btn primary sm" style="width:100%; justify-content:center;" onclick="showToast('Přístup udělen nové praxi','ti-shield-check')"><i class="ti ti-shield-plus"></i>Udělit přístup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check"></i><span id="toastMsg"></span></div>
+
+<div class="screen-indicator" id="screenIndicator" onclick="copyScreenCode()" title="Klikněte pro zkopírování kódu obrazovky">
+  <div class="si-label">Aktuální obrazovka</div>
+  <div class="si-code" id="siCode">S01</div>
+  <div class="si-hint"><i class="ti ti-copy"></i>klik = kopírovat kód</div>
+</div>
+
+<script>
+const patients = [
+  {id:1, jmeno:'Jana Nováková', iniciály:'JN', vek:34, riziko:'med', posledni:'20. 6. 2026', recallMesice:2, recallTydny:8, recallText:'Doporučeno: dentální hygiena + kontrola za 2 měsíce', recallRisk:'Parodontální riziko: střední — kratší interval než standardních 6 měsíců', sdilena:true, globalId:'PAT-20481',
+    tagy:[{t:'Bruxismus', typ:'warn'},{t:'Bez alergií', typ:'neutral'}],
+    poznamky:['Citlivé zuby na chlad — použít teplou vodu při airflow.','Preferuje termíny v odpoledních hodinách.'],
+    vykony:[
+      {datum:'20. 6. 2026', nazev:'Základní čištění + Airflow', tenant:'vaše praxe', cizi:false, detail:{
+        visitType:'zakladni', visitLabel:'Základní čištění', trvani:'45 min', doplnkove:['Airflow'],
+        psrValues:[1,2,1,2,1,0], psrMax:2,
+        extra:['Obličej/krk bez nálezu'], intra:['Sliznice a jazyk bez nálezu'],
+        kamen:['Naddásňový'], softTissue:[],
+        material:['Ultrazvukový scaler','Airflow prášek (bikarbonát)'],
+        doporuceni:['Mezizubní kartáčky','Úprava techniky čištění (Bassova metoda)'],
+        plak:'18', bop:'12', recall:'2',
+        poznamka:'Citlivé zuby na chlad — použit teplý sprej při airflow. Lehké krvácení v oblasti dolního předního sextantu, doporučena reinstruktáž mezizubní hygieny.',
+        informZL:true
+      }},
+      {datum:'15. 1. 2026', nazev:'Parodontologické vyšetření (PSR)', tenant:'vaše praxe', cizi:false},
+      {datum:'3. 9. 2025', nazev:'Dentální hygiena', tenant:'Mgr. Petra Sedláčková, Brno', cizi:true},
+    ],
+    granty:[{od:'Mgr. Petra Sedláčková (Brno)', rozsah:'celá dokumentace', platnost:'do odvolání', datum:'12. 5. 2026'}],
+    plan:[{vykon:'Dentální hygiena (recall)', termin:'do 2 měsíců', cena:900, souhlas:'ok'},{vykon:'Parodontologické vyšetření', termin:'do 4 měsíců', cena:700, souhlas:'wait'}],
+    souhlas:{datum:'20. 6. 2026', podepsal:'Jana Nováková', zpusob:'elektronicky (tablet v ordinaci)', pokryto:['Informace o stavu a navrženém postupu ošetření','Sdělení rizik a možných komplikací','Náklady a platební podmínky','Zpracování zdravotní dokumentace (GDPR čl. 9)']}
+  },
+  {id:2, jmeno:'Petr Svoboda', iniciály:'PS', vek:45, riziko:'high', posledni:'2. 5. 2026', recallMesice:3, recallTydny:4, recallText:'Doporučeno: parodontologická kontrola za 3 měsíce', recallRisk:'Parodontální riziko: vysoké — kuřák, krvácení při sondáži', sdilena:false, globalId:'PAT-20112',
+    tagy:[{t:'Kuřák', typ:'warn'},{t:'Krvácení při sondáži', typ:''}],
+    poznamky:['Doporučena intenzivnější instruktáž mezizubní hygieny.'],
+    vykony:[
+      {datum:'2. 5. 2026', nazev:'Parodontologické vyšetření (PSR)', tenant:'vaše praxe', cizi:false},
+      {datum:'15. 3. 2026', nazev:'Kontrolní recall', tenant:'vaše praxe', cizi:false, noshow:true},
+    ],
+    granty:[],
+    plan:[{vykon:'Parodontologická kontrola', termin:'do 3 měsíců', cena:700, souhlas:'ok'}],
+    souhlas:{datum:'2. 5. 2026', podepsal:'Petr Svoboda', zpusob:'elektronicky (tablet v ordinaci)', pokryto:['Informace o stavu a navrženém postupu ošetření','Sdělení rizik a možných komplikací','Náklady a platební podmínky','Zpracování zdravotní dokumentace (GDPR čl. 9)']}
+  },
+  {id:3, jmeno:'Anna Dvořáková', iniciály:'AD', vek:8, riziko:'low', posledni:'10. 4. 2026', recallMesice:6, recallTydny:14, recallText:'Doporučeno: preventivní prohlídka za 6 měsíců', recallRisk:'Parodontální riziko: nízké', sdilena:false, globalId:'PAT-20933', ucet:'Marie Dvořáková (rodič)',
+    tagy:[{t:'Bez alergií', typ:'neutral'}],
+    poznamky:['Rezervuje a doprovází matka Marie Dvořáková.','První zkušenost s hygienou — postupovat pomalu, hravou formou.'],
+    vykony:[{datum:'10. 4. 2026', nazev:'Instruktáž ústní hygieny', tenant:'vaše praxe', cizi:false}],
+    granty:[],
+    plan:[{vykon:'Preventivní prohlídka', termin:'do 6 měsíců', cena:0, souhlas:'ok'}],
+    souhlas:{datum:'10. 4. 2026', podepsal:'Marie Dvořáková (zákonný zástupce)', zpusob:'papírově při vstupním vyšetření, naskenováno', pokryto:['Informace o stavu a navrženém postupu ošetření','Sdělení rizik a možných komplikací','Náklady a platební podmínky','Zpracování zdravotní dokumentace (GDPR čl. 9)']}
+  },
+  {id:4, jmeno:'Tomáš Král', iniciály:'TK', vek:29, riziko:'low', posledni:'28. 3. 2026', recallMesice:6, recallTydny:20, recallText:'Doporučeno: standardní recall za 6 měsíců', recallRisk:'Parodontální riziko: nízké', sdilena:false, globalId:'PAT-19887',
+    tagy:[{t:'Bez alergií', typ:'neutral'}],
+    poznamky:[],
+    vykony:[{datum:'28. 3. 2026', nazev:'Dentální hygiena', tenant:'vaše praxe', cizi:false}],
+    granty:[],
+    plan:[],
+    souhlas:{datum:'28. 3. 2026', podepsal:'Tomáš Král', zpusob:'elektronicky (tablet v ordinaci)', pokryto:['Informace o stavu a navrženém postupu ošetření','Náklady a platební podmínky','Zpracování zdravotní dokumentace (GDPR čl. 9)']}
+  },
+  {id:5, jmeno:'Lucie Horáková', iniciály:'LH', vek:52, riziko:'med', posledni:'18. 6. 2026', recallMesice:4, recallTydny:10, recallText:'Doporučeno: hygiena + kontrola za 4 měsíce', recallRisk:'Parodontální riziko: střední', sdilena:true, globalId:'PAT-18820',
+    tagy:[{t:'Alergie na penicilin', typ:''},{t:'Osteoporóza', typ:'warn'}],
+    poznamky:['Upozornit na alergii před jakoukoli medikací.'],
+    vykony:[{datum:'18. 6. 2026', nazev:'Dentální hygiena', tenant:'vaše praxe', cizi:false},{datum:'—', nazev:'Vstupní vyšetření', tenant:'MUDr. Filip Novotný — přístup zamčen, chybí souhlas', cizi:true, locked:true}],
+    granty:[],
+    plan:[{vykon:'Dentální hygiena', termin:'do 4 měsíců', cena:900, souhlas:'ok'}],
+    souhlas:{datum:'18. 6. 2026', podepsal:'Lucie Horáková', zpusob:'elektronicky (tablet v ordinaci)', pokryto:['Informace o stavu a navrženém postupu ošetření','Sdělení rizik a možných komplikací (alergie na penicilin)','Náklady a platební podmínky','Zpracování zdravotní dokumentace (GDPR čl. 9)']}
+  },
+  {id:6, jmeno:'Marek Beneš', iniciály:'MB', vek:61, riziko:'high', posledni:'25. 6. 2026', recallMesice:3, recallTydny:6, recallText:'Doporučeno: parodontologická kontrola za 3 měsíce', recallRisk:'Parodontální riziko: vysoké — diabetes 2. typu', sdilena:true, globalId:'PAT-17765',
+    tagy:[{t:'Diabetes 2. typu', typ:'warn'},{t:'Vysoký krevní tlak', typ:'warn'}],
+    poznamky:['Kratší recall interval kvůli diabetu — vyšší riziko parodontitidy.'],
+    vykony:[{datum:'25. 6. 2026', nazev:'Parodontologické vyšetření (PSR)', tenant:'vaše praxe', cizi:false},{datum:'14. 2. 2026', nazev:'Dentální hygiena', tenant:'DentaCentrum Vinohrady', cizi:true}],
+    granty:[{od:'DentaCentrum Vinohrady', rozsah:'jen parodontální nálezy', platnost:'do 30. 9. 2026', datum:'2. 3. 2026'}],
+    plan:[{vykon:'Parodontologická kontrola', termin:'do 3 měsíců', cena:700, souhlas:'ok'}],
+    souhlas:{datum:'25. 6. 2026', podepsal:'Marek Beneš', zpusob:'elektronicky (tablet v ordinaci)', pokryto:['Informace o stavu a navrženém postupu ošetření','Sdělení rizik a možných komplikací (diabetes 2. typu)','Náklady a platební podmínky','Zpracování zdravotní dokumentace (GDPR čl. 9)']}
+  },
+  {id:7, jmeno:'Eva Procházková', iniciály:'EP', vek:19, riziko:'low', posledni:'30. 6. 2026', recallMesice:6, recallTydny:24, recallText:'Doporučeno: standardní recall za 6 měsíců', recallRisk:'Parodontální riziko: nízké', sdilena:false, globalId:'PAT-21044',
+    tagy:[{t:'Bez alergií', typ:'neutral'}],
+    poznamky:[],
+    vykony:[{datum:'30. 6. 2026', nazev:'Dentální hygiena + Fluoridace', tenant:'vaše praxe', cizi:false}],
+    granty:[],
+    plan:[],
+    souhlas:{datum:'30. 6. 2026', podepsal:'Eva Procházková', zpusob:'elektronicky (tablet v ordinaci)', pokryto:['Informace o stavu a navrženém postupu ošetření','Náklady a platební podmínky','Zpracování zdravotní dokumentace (GDPR čl. 9)']}
+  },
+];
+
+const agenda = [
+  {cas:'08:00', trvani:'30 min', pid:4, typ:'Dentální hygiena', stav:'done'},
+  {cas:'08:45', trvani:'45 min', pid:6, typ:'Parodontologické vyšetření', stav:'done'},
+  {cas:'09:45', trvani:'20 min', pid:7, typ:'Kontrola po fluoridaci', stav:'done'},
+  {cas:'10:30', trvani:'45 min', pid:1, typ:'Dentální hygiena + Airflow', stav:'progress'},
+  {cas:'11:30', trvani:'30 min', pid:3, typ:'Instruktáž ústní hygieny', stav:'confirmed'},
+  {cas:'13:30', trvani:'45 min', pid:2, typ:'Parodontologická kontrola', stav:'confirmed'},
+  {cas:'14:30', trvani:'30 min', pid:5, typ:'Dentální hygiena', stav:'wait'},
+  {cas:'15:30', trvani:'20 min', pid:4, typ:'Recall — kontrola', stav:'cancel'},
+];
+
+const calDays = [
+  {label:'Po', num:30, items:[{t:'08:30',n:'Petr Svoboda',p:'Hygiena',s:''},{t:'11:00',n:'Eva Procházková',p:'Fluoridace',s:''}]},
+  {label:'Út', num:1, items:[{t:'09:00',n:'Tomáš Král',p:'Hygiena',s:''},{t:'13:00',n:'Marek Beneš',p:'PSR vyšetření',s:'wait'}]},
+  {label:'St', num:2, items:[{t:'10:00',n:'Lucie Horáková',p:'Hygiena',s:''}]},
+  {label:'Čt', num:3, items:[{t:'08:30',n:'Anna Dvořáková',p:'Instruktáž',s:''},{t:'14:00',n:'Jana Nováková',p:'Kontrola',s:''}]},
+  {label:'Pá', num:4, items:[{t:'08:00',n:'Tomáš Král',p:'Hygiena',s:'done'},{t:'10:30',n:'Jana Nováková',p:'Hygiena + Airflow',s:''},{t:'14:30',n:'Lucie Horáková',p:'Hygiena',s:'wait'}]},
+];
+
+const waitlist = [
+  {jmeno:'Petr Svoboda', preferuje:'kterýkoli termín tento týden dopoledne', od:'30. 6. 2026'},
+  {jmeno:'Tomáš Král', preferuje:'čtvrtek odpoledne', od:'2. 7. 2026'},
+];
+
+const priceList = [
+  {nazev:'Vstupní vyšetření', trvani:'15–30 min', cena:600},
+  {nazev:'Základní čištění (scaling + leštění)', trvani:'40–50 min', cena:900},
+  {nazev:'Rozšířené/hloubkové čištění (za kvadrant)', trvani:'20–60 min', cena:650},
+  {nazev:'Recall / udržovací fáze', trvani:'60 min', cena:800},
+  {nazev:'Airflow (doplňkově)', trvani:'15 min', cena:500},
+  {nazev:'Fluoridace (doplňkově)', trvani:'10 min', cena:300},
+  {nazev:'Instruktáž ústní hygieny (samostatně)', trvani:'20 min', cena:350},
+  {nazev:'Bělení zubů (pod dohledem ZL)', trvani:'45 min', cena:1800},
+];
+
+const invoices = [
+  {cislo:'F2026-0142', datum:'4. 7. 2026', pacient:'Tomáš Král', vykon:'Dentální hygiena', castka:900, zpusob:'Kartou', stav:'ok'},
+  {cislo:'F2026-0141', datum:'30. 6. 2026', pacient:'Eva Procházková', vykon:'Dentální hygiena + Fluoridace', castka:1200, zpusob:'Hotově', stav:'ok'},
+  {cislo:'F2026-0140', datum:'25. 6. 2026', pacient:'Marek Beneš', vykon:'Parodontologické vyšetření', castka:700, zpusob:'Bankovní převod', stav:'wait'},
+  {cislo:'F2026-0139', datum:'20. 6. 2026', pacient:'Jana Nováková', vykon:'Dentální hygiena + Airflow', castka:1400, zpusob:'Kartou', stav:'ok'},
+];
+
+const inventory = [
+  {nazev:'Fluoridový gel', mnozstvi:'3 ks', min:'2 ks', stav:'ok'},
+  {nazev:'Airflow prášek (bikarbonát)', mnozstvi:'1 balení', min:'2 balení', stav:'low'},
+  {nazev:'Jednorázové kartáčky', mnozstvi:'40 ks', min:'50 ks', stav:'low'},
+  {nazev:'Rukavice nitril (M)', mnozstvi:'6 balení', min:'3 balení', stav:'ok'},
+  {nazev:'Sondy PSR (jednorázové)', mnozstvi:'25 ks', min:'20 ks', stav:'ok'},
+  {nazev:'Dezinfekce nástrojů', mnozstvi:'0,5 l', min:'1 l', stav:'low'},
+];
+
+const reviews = [
+  {pacient:'Tomáš K.', hvezdy:5, text:'Skvělý přístup, citlivé ošetření. Doporučuji!', datum:'28. 3. 2026'},
+  {pacient:'Eva P.', hvezdy:5, text:'Vždy na čas, příjemné prostředí.', datum:'30. 6. 2026'},
+  {pacient:'Lucie H.', hvezdy:4, text:'Spokojenost, jen delší čekací doba na termín.', datum:'18. 6. 2026'},
+  {pacient:'Petr S.', hvezdy:5, text:'Konečně někdo, kdo mi to s parodontem vysvětlil srozumitelně.', datum:'2. 5. 2026'},
+];
+
+const auditLog = [
+  {cas:'4. 7. 2026 10:31', kdo:'Bc. Tereza Malá (vaše praxe)', co:'Jana Nováková — PHR', akce:'Zobrazení karty', zaklad:'Členství v tenantu', stav:'ok'},
+  {cas:'3. 7. 2026 16:02', kdo:'Mgr. Petra Sedláčková (Brno)', co:'Jana Nováková — PHR', akce:'Zobrazení historie výkonů', zaklad:'Platný grant (celá dokumentace)', stav:'ok'},
+  {cas:'2. 7. 2026 09:14', kdo:'MUDr. Filip Novotný (ordinace)', co:'Lucie Horáková — PHR', akce:'Pokus o zobrazení', zaklad:'Chybí platný grant — přístup odepřen', stav:'denied'},
+  {cas:'1. 7. 2026 14:47', kdo:'DentaCentrum Vinohrady', co:'Marek Beneš — parodontální nález', akce:'Zobrazení (omezený rozsah)', zaklad:'Platný grant (jen parodontální nálezy)', stav:'ok'},
+  {cas:'28. 6. 2026 08:20', kdo:'Bc. Tereza Malá (vaše praxe)', co:'Petr Svoboda — PHR', akce:'Úprava anamnézy', zaklad:'Členství v tenantu', stav:'ok'},
+];
+
+let currentPatientId = 1;
+const psrSextanty = [
+  {label:'Vpravo nahoře', fdi:'17–14'},
+  {label:'Vpředu nahoře', fdi:'13–23'},
+  {label:'Vlevo nahoře', fdi:'24–27'},
+  {label:'Vlevo dole', fdi:'34–37'},
+  {label:'Vpředu dole', fdi:'33–43'},
+  {label:'Vpravo dole', fdi:'44–47'},
+];
+
+function pById(id){ return patients.find(p=>p.id===id); }
+function riskLabel(r){ return r==='high'?'Vysoké':r==='med'?'Střední':'Nízké'; }
+
+function renderAgenda(){
+  const statusMap = {
+    done:{badge:'off', label:'Dokončeno'},
+    progress:{badge:'info', label:'Probíhá'},
+    confirmed:{badge:'ok', label:'Potvrzeno'},
+    wait:{badge:'wait', label:'Čeká na potvrzení'},
+    cancel:{badge:'cancel', label:'Zrušeno'},
+  };
+  const el = document.getElementById('agendaList');
+  el.innerHTML = agenda.map(a=>{
+    const p = pById(a.pid);
+    const st = statusMap[a.stav];
+    return `<div class="agenda-item" onclick="openPatient(${p.id})">
+      <div class="agenda-time">${a.cas}<span>${a.trvani}</span></div>
+      <div class="agenda-avatar">${p.iniciály}</div>
+      <div class="agenda-info">
+        <div class="name">${p.jmeno} ${p.sdilena?'<i class="ti ti-fingerprint global-icon" title="Sdílená historie napříč hygienistkami"></i>':''}</div>
+        <div class="meta">${a.typ}</div>
+      </div>
+      <span class="badge ${st.badge}">${st.label}</span>
+      <div class="agenda-actions">
+        <button class="btn sm" onclick="event.stopPropagation(); showToast('Pacient přihlášen v čekárně','ti-door-enter')" title="Check-in"><i class="ti ti-door-enter"></i></button>
+        <button class="btn sm" onclick="event.stopPropagation(); showToast('Otevřeno vlákno zpráv k rezervaci','ti-message')" title="Zpráva"><i class="ti ti-message-circle"></i></button>
+        <button class="btn sm" onclick="event.stopPropagation(); openRecordModal(${p.id})" title="Vložit záznam z výkonu"><i class="ti ti-clipboard-plus"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderCalendar(){
+  const el = document.getElementById('calGrid');
+  el.innerHTML = calDays.map(d=>{
+    const items = d.items.map(i=>`
+      <div class="cal-slot ${i.s}" onclick="showToast('Detail rezervace: ${i.n}','ti-calendar')">
+        <div class="t">${i.t}</div><div class="n">${i.n}</div><div class="p">${i.p}</div>
+      </div>`).join('') || '<div class="cal-empty">Volno</div>';
+    return `<div>
+      <div class="cal-col-head">${d.label}<span class="d">${d.num}. 7.</span></div>
+      <div class="cal-col">${items}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('waitlistBody').innerHTML = waitlist.map(w=>`
+    <div class="waitlist-row">
+      <div class="waitlist-icon"><i class="ti ti-hourglass"></i></div>
+      <div style="flex:1;"><div style="font-weight:600; font-size:13.5px;">${w.jmeno}</div><div style="font-size:12px; color:var(--ink-3)">Preferuje: ${w.preferuje} · na listině od ${w.od}</div></div>
+      <button class="btn sm primary" onclick="showToast('Termín nabídnut pacientovi SMS zprávou','ti-send')">Nabídnout termín</button>
+    </div>`).join('');
+}
+
+function renderPatients(filter){
+  const el = document.getElementById('patientTable');
+  const list = patients.filter(p=>!filter || p.jmeno.toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('patientCount').textContent = list.length;
+  el.innerHTML = list.map(p=>`
+    <tr class="rowlink" onclick="openPatient(${p.id})">
+      <td><div class="name-cell"><div class="agenda-avatar">${p.iniciály}</div><div><div style="font-weight:600">${p.jmeno} ${p.sdilena?'<i class="ti ti-fingerprint global-icon" title="Sdílená historie"></i>':''}</div><div style="font-size:12px;color:var(--ink-3)">${p.vek} let ${p.ucet?'· '+p.ucet:''}</div></div></div></td>
+      <td><span class="risk-dot ${p.riziko}"></span>${riskLabel(p.riziko)}</td>
+      <td>${p.posledni}</td>
+      <td>za ${p.recallMesice} ${p.recallMesice===1?'měsíc':(p.recallMesice<5?'měsíce':'měsíců')}</td>
+      <td>${p.sdilena?'<span class="badge info"><i class="ti ti-fingerprint"></i> sdílená</span>':'<span class="badge off">jen zde</span>'}</td>
+      <td><i class="ti ti-chevron-right" style="color:var(--ink-3)"></i></td>
+    </tr>`).join('');
+}
+function filterPatients(v){ renderPatients(v); }
+
+function openPatient(id){
+  const p = pById(id);
+  currentPatientId = id;
+  document.getElementById('pdAvatar').textContent = p.iniciály;
+  document.getElementById('pdName').innerHTML = `${p.jmeno} <i class="ti ti-fingerprint global-icon" title="Globální ID: ${p.globalId}"></i>`;
+  document.getElementById('pdMeta').innerHTML = `
+    <span><i class="ti ti-cake"></i>${p.vek} let</span>
+    <span><i class="ti ti-id"></i>${p.globalId}</span>
+    ${p.ucet?`<span><i class="ti ti-users"></i>${p.ucet}</span>`:''}
+    <span><i class="ti ti-clock"></i>Poslední návštěva ${p.posledni}</span>`;
+  document.getElementById('pdTags').innerHTML = p.tagy.map(t=>`<span class="tag ${t.typ}">${t.t}</span>`).join('') || '<span style="color:var(--ink-3);font-size:13px">Žádné záznamy</span>';
+  document.getElementById('pdNotes').innerHTML = p.poznamky.length ? p.poznamky.map(n=>`<div class="note-line">${n}</div>`).join('') : '<div style="color:var(--ink-3);font-size:13px">Bez poznámek</div>';
+  document.getElementById('pdVisits').innerHTML = p.vykony.map((v,idx)=>{
+    if(v.locked){
+      return `<div class="locked-note" style="cursor:pointer" onclick="showToast('Přístup vyžaduje platný souhlas pacienta — chybí grant (viz ZUB-49)','ti-lock')"><i class="ti ti-lock"></i>${v.tenant}</div>`;
+    }
+    return `<div class="visit-row" onclick="openVisitDetail(${p.id},${idx})">
+      <div class="visit-dot ${v.cizi?'foreign':''} ${v.noshow?'noshow':''}"></div>
+      <div class="visit-body"><div class="visit-date">${v.datum}</div><div class="visit-title">${v.nazev} ${v.noshow?'<span class="badge cancel" style="margin-left:6px">Nedostavil/a se</span>':''} ${v.detail?'<span class="badge ok" style="margin-left:6px"><i class="ti ti-lock"></i> uzamčeno</span>':''}</div><div class="visit-tenant">${v.cizi?'<i class="ti ti-building-hospital" style="font-size:12px"></i> ':''}${v.tenant}</div>${v.detail?`<div class="visit-extra">PSR max ${v.detail.psrMax} · Plak ${v.detail.plak} % · BOP ${v.detail.bop} % · doporučený recall za ${v.detail.recall} měs.</div>`:''}</div>
+      <i class="ti ti-chevron-right"></i>
+    </div>`;
+  }).join('') || '<div class="empty-note"><i class="ti ti-history"></i>Zatím žádné provedené výkony</div>';
+
+  document.getElementById('pdPlan').innerHTML = p.plan.length ? `<table class="tbl"><thead><tr><th>Výkon</th><th>Doporučený termín</th><th>Cena</th><th>Souhlas</th></tr></thead><tbody>${
+    p.plan.map(pl=>`<tr><td>${pl.vykon}</td><td>${pl.termin}</td><td>${pl.cena.toLocaleString('cs-CZ')} Kč</td><td>${pl.souhlas==='ok'?'<span class="badge ok">Odsouhlaseno</span>':'<span class="badge wait">Čeká na souhlas</span>'}</td></tr>`).join('')
+  }</tbody></table>` : '<div class="empty-note"><i class="ti ti-clipboard-list"></i>Zatím není navržen žádný plán péče</div>';
+  const s = p.souhlas;
+  document.getElementById('pdConsent').innerHTML = `
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:14px;">
+      <div style="display:flex; gap:12px;">
+        <div class="grant-icon you"><i class="ti ti-file-check"></i></div>
+        <div>
+          <div style="font-weight:600; font-size:13.5px;">Informovaný souhlas podepsán <span class="badge ok" style="margin-left:4px">Platný</span></div>
+          <div style="font-size:12px; color:var(--ink-3); margin-top:2px;">Podepsal(a): ${s.podepsal} · ${s.datum} · ${s.zpusob}</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn sm" onclick="showToast('Otevřen PDF náhled souhlasu','ti-file-text')"><i class="ti ti-file-text"></i>Zobrazit PDF</button>
+        <button class="btn sm" onclick="showToast('Odkaz na nový souhlas odeslán pacientovi','ti-send')"><i class="ti ti-send"></i>Vyžádat nový</button>
+      </div>
+    </div>
+    <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-3); margin-bottom:6px;">Souhlas pokrývá (dle etického kodexu ADH ČR, bod 3.1)</div>
+    ${s.pokryto.map(t=>`<div class="note-line"><span><i class="ti ti-check" style="color:var(--teal-600); margin-right:6px"></i>${t}</span></div>`).join('')}`;
+
+  document.getElementById('recallNum').innerHTML = `${p.recallTydny}<small>týdnů do dalšího recallu</small>`;
+  document.getElementById('recallText').textContent = p.recallText;
+  document.getElementById('recallRisk').textContent = p.recallRisk;
+  document.getElementById('pdGrants').innerHTML = p.granty.length ? p.granty.map(g=>`
+    <div class="grant-row">
+      <div class="grant-icon"><i class="ti ti-building-hospital"></i></div>
+      <div class="grant-body"><div class="grant-title">${g.od}</div><div class="grant-meta">Rozsah: ${g.rozsah} · Platnost: ${g.platnost} · Uděleno ${g.datum}</div></div>
+      <button class="btn sm danger" onclick="revokeGrant(this)">Odvolat</button>
+    </div>`).join('') : '<div class="empty-note"><i class="ti ti-shield-lock"></i>Pacient zatím neudělil přístup žádné jiné praxi</div>';
+
+  document.querySelectorAll('#view-detail .tab').forEach((t,i)=>t.classList.toggle('active', i===0));
+  document.querySelectorAll('#view-detail .tabview').forEach((t,i)=>t.classList.toggle('active', i===0));
+  switchView('detail');
+}
+
+function renderFinance(){
+  document.getElementById('priceListBody').innerHTML = priceList.map(p=>`<tr><td>${p.nazev}</td><td>${p.trvani}</td><td>${p.cena>0?p.cena.toLocaleString('cs-CZ')+' Kč':'Bez poplatku'}</td></tr>`).join('');
+  const stavMap = {ok:{b:'ok', l:'Zaplaceno'}, wait:{b:'wait', l:'Nezaplaceno'}};
+  document.getElementById('invoiceBody').innerHTML = invoices.map(i=>{
+    const s = stavMap[i.stav];
+    return `<tr><td>${i.cislo}<br><span style="font-size:11.5px;color:var(--ink-3)">${i.datum}</span></td><td>${i.pacient}</td><td>${i.vykon}</td><td>${i.castka.toLocaleString('cs-CZ')} Kč</td><td>${i.zpusob}</td><td><span class="badge ${s.b}">${s.l}</span></td></tr>`;
+  }).join('');
+}
+
+function renderInventory(){
+  document.getElementById('inventoryBody').innerHTML = inventory.map(i=>`
+    <tr><td>${i.nazev}</td><td>${i.mnozstvi}</td><td>${i.min}</td>
+    <td><span class="stock-dot ${i.stav}"></span>${i.stav==='ok'?'V pořádku':'Dochází'}</td>
+    <td>${i.stav==='low'?'<button class="btn sm" onclick="showToast(\'Objednávka materiálu odeslána\',\'ti-truck-delivery\')">Objednat</button>':''}</td></tr>`).join('');
+}
+
+function renderReviews(){
+  document.getElementById('reviewsBody').innerHTML = reviews.map(r=>`
+    <div class="review-row">
+      <div class="review-head"><span class="review-name">${r.pacient}</span><span class="star-row">${'★'.repeat(r.hvezdy)}${'☆'.repeat(5-r.hvezdy)}</span><span class="review-date">${r.datum}</span></div>
+      <div class="review-text">${r.text}</div>
+    </div>`).join('');
+}
+
+function renderAudit(){
+  document.getElementById('auditBody').innerHTML = auditLog.map(a=>`
+    <tr class="${a.stav==='denied'?'denied':''}">
+      <td>${a.cas}</td><td>${a.kdo}</td><td>${a.co}</td>
+      <td>${a.stav==='denied'?'<span class="badge cancel">'+a.akce+'</span>':a.akce}</td>
+      <td>${a.zaklad}</td>
+    </tr>`).join('');
+}
+
+const viewCodes = {agenda:'S01', kalendar:'S02', pacienti:'S03', detail:'S04.1', fakturace:'S05', sklad:'S06', recenze:'S07', souhlasy:'S08', audit:'S09', nastaveni:'S10'};
+let currentScreenCode = 'S01';
+let screenStack = [];
+function setScreenCode(code){
+  currentScreenCode = code;
+  const el = document.getElementById('siCode');
+  if(el) el.textContent = code;
+}
+function pushModalScreen(code){ screenStack.push(currentScreenCode); setScreenCode(code); }
+function popModalScreen(){ const prev = screenStack.pop(); if(prev) setScreenCode(prev); }
+function copyScreenCode(){
+  const text = currentScreenCode;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>showToast('Kód "'+text+'" zkopírován do schránky', 'ti-copy'));
+  } else {
+    showToast('Kód obrazovky: '+text, 'ti-copy');
+  }
+}
+
+document.querySelectorAll('.navitem').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchView(btn.dataset.view));
+});
+function switchView(name, subCode){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.navitem').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+  setScreenCode(subCode || viewCodes[name] || name);
+}
+
+document.addEventListener('click', e=>{
+  const tab = e.target.closest('.tab');
+  if(tab){
+    const scope = tab.closest('.view');
+    scope.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t===tab));
+    scope.querySelectorAll('.tabview').forEach(tv=>tv.classList.toggle('active', tv.id === 'tab-'+tab.dataset.tab));
+    if(tab.dataset.code) setScreenCode(tab.dataset.code);
+    return;
+  }
+  const ptab = e.target.closest('.ptab');
+  if(ptab){
+    const scope = ptab.closest('.phone-screen');
+    scope.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('active', t===ptab));
+    scope.querySelectorAll('.ptabview').forEach(tv=>tv.classList.toggle('active', tv.id === 'ptab-'+ptab.dataset.ptab));
+    if(ptab.dataset.code) setScreenCode(ptab.dataset.code);
+  }
+});
+
+function toggleNewPatient(val){
+  document.getElementById('newPatientBox').classList.toggle('show', val==='novy');
+}
+const visitTypeNotes = {
+  vstupni: 'Indikace: každý nový pacient nebo pacient po přerušení recallu. Zahrnuje anamnézu, extraorální a intraorální vyšetření.',
+  zakladni: 'Indikace: zdravý parodont / udržovací fáze / gingivitida. Odstranění povlaků a kamene supra- a subgingiválně do 3 mm.',
+  rozsirene: 'Indikace: parodontitida. Deep scaling a root planing subgingiválně nad 3 mm, postup po kvadrantech/sextantech.',
+  recall: 'Indikace: každý pacient v udržovací fázi. Kontrola anamnézy, porovnání s předchozím nálezem, remotivace.',
+};
+function updateBookingDuration(val){
+  const sel = document.getElementById('bkVisitType');
+  document.getElementById('bkVisitNote').textContent = visitTypeNotes[val] || '';
+}
+function openBooking(){ document.getElementById('bookingModal').classList.add('show'); updateBookingDuration(document.getElementById('bkVisitType').value); pushModalScreen('M01'); }
+function closeBooking(){ document.getElementById('bookingModal').classList.remove('show'); popModalScreen(); }
+function confirmBooking(){
+  closeBooking();
+  showToast('Rezervace byla vytvořena a pacientovi odeslána SMS připomínka', 'ti-calendar-check');
+}
+document.getElementById('bookingModal').addEventListener('click', e=>{ if(e.target.id==='bookingModal') closeBooking(); });
+
+function openInvoice(){ document.getElementById('invoiceModal').classList.add('show'); updateInvoiceTotal(); pushModalScreen('M02'); }
+function closeInvoice(){ document.getElementById('invoiceModal').classList.remove('show'); popModalScreen(); }
+function updateInvoiceTotal(){
+  const sel = document.getElementById('invProcedure');
+  const cena = sel.options[sel.selectedIndex].dataset.cena;
+  document.getElementById('invTotal').value = Number(cena).toLocaleString('cs-CZ') + ' Kč';
+}
+function confirmInvoice(){
+  closeInvoice();
+  showToast('Faktura vystavena a odeslána pacientovi e-mailem', 'ti-receipt');
+}
+document.getElementById('invoiceModal').addEventListener('click', e=>{ if(e.target.id==='invoiceModal') closeInvoice(); });
+
+function generatePsrGrid(){
+  const el = document.getElementById('psrGrid');
+  el.innerHTML = psrSextanty.map((s,i)=>`
+    <div class="psr-box">
+      <label>${s.label} <span class="fdi">(${s.fdi})</span></label>
+      <select class="psr-select" data-idx="${i}" onchange="updateRecallSuggestion()">
+        <option value="0">0</option><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+      </select>
+    </div>`).join('');
+}
+
+function toggleChip(input){
+  input.closest('.chip-check').classList.toggle('checked', input.checked);
+}
+document.querySelectorAll('.chip-check input[checked]').forEach(i=>i.closest('.chip-check').classList.add('checked'));
+
+function getPsrMax(){
+  const vals = Array.from(document.querySelectorAll('.psr-select')).map(s=>Number(s.value));
+  return vals.length ? Math.max(...vals) : 0;
+}
+
+function onRecordVisitTypeChange(){
+  const sel = document.getElementById('recVisitType');
+  const opt = sel.options[sel.selectedIndex];
+  document.getElementById('recTrvani').value = opt.dataset.trvani;
+  document.getElementById('deepScalingBox').style.display = (sel.value==='rozsirene') ? 'block' : 'none';
+  if(sel.value==='rozsirene' && !document.getElementById('deepScalingChips').innerHTML){
+    document.getElementById('deepScalingChips').innerHTML = psrSextanty.map(s=>`<label class="chip-check"><input type="checkbox" onchange="toggleChip(this)">${s.label} (${s.fdi})</label>`).join('');
+  }
+  renderPreviousCompare(sel.value);
+}
+
+function renderPreviousCompare(visitType){
+  const box = document.getElementById('recPreviousCompare');
+  const p = pById(currentPatientId);
+  const prev = p.vykony.find(v=>v.detail);
+  if(visitType==='recall' && prev){
+    box.innerHTML = `<div class="panel-note gray" style="margin:0 0 14px; border-radius:8px;"><i class="ti ti-history"></i>Porovnání s předchozí návštěvou (${prev.datum}): PSR max ${prev.detail.psrMax} · Plak ${prev.detail.plak} % · BOP ${prev.detail.bop} % → doplňte aktuální hodnoty níže.</div>`;
+  } else {
+    box.innerHTML = '';
+  }
+}
+
+function updateRecallSuggestion(){
+  const max = getPsrMax();
+  let meze, text;
+  if(max>=3){ meze='3'; text='Vysoké parodontální riziko (PSR '+max+') — doporučen recall za 3 měsíce.'; }
+  else if(max===2){ meze='4'; text='Střední nález (PSR '+max+', přítomen zubní kámen) — doporučen recall za 4 měsíce.'; }
+  else { meze='6'; text='Nízké riziko (PSR '+max+') — standardní recall za 6 měsíců.'; }
+  document.getElementById('recallSuggestText').textContent = text;
+  document.getElementById('recRecallOverride').value = meze;
+}
+
+function openRecordModal(id){
+  if(id) currentPatientId = id;
+  const p = pById(currentPatientId);
+  document.getElementById('recPatientName').textContent = p.jmeno;
+  document.getElementById('deepScalingChips').innerHTML = '';
+  generatePsrGrid();
+  updateRecallSuggestion();
+  onRecordVisitTypeChange();
+  document.getElementById('recordModal').classList.add('show');
+  pushModalScreen('M03');
+}
+function closeRecordModal(){ document.getElementById('recordModal').classList.remove('show'); popModalScreen(); }
+document.getElementById('recordModal').addEventListener('click', e=>{ if(e.target.id==='recordModal') closeRecordModal(); });
+
+function confirmRecord(){
+  if(!document.getElementById('recConfirm').checked){
+    showToast('Nejprve potvrďte správnost záznamu zaškrtnutím políčka', 'ti-alert-triangle');
+    return;
+  }
+  const p = pById(currentPatientId);
+  const visitLabels = {vstupni:'Vstupní vyšetření', zakladni:'Základní čištění', rozsirene:'Rozšířené/hloubkové čištění', recall:'Recall / udržovací fáze'};
+  const visitType = document.getElementById('recVisitType').value;
+  const typy = Array.from(document.querySelectorAll('#recTypChips input:checked')).map(i=>i.value);
+  const nazev = visitLabels[visitType] + (typy.length ? ' + ' + typy.join(' + ') : '');
+  const datum = document.getElementById('recDatum').value;
+  const datumCz = datum ? datum.split('-').reverse().join('. ') + '.' : 'dnes';
+  const getChecked = id => Array.from(document.querySelectorAll('#'+id+' input:checked')).map(i=>i.value);
+  const detail = {
+    visitType: visitType,
+    visitLabel: visitLabels[visitType],
+    trvani: document.getElementById('recTrvani').value,
+    doplnkove: typy,
+    psrValues: Array.from(document.querySelectorAll('.psr-select')).map(s=>Number(s.value)),
+    psrMax: getPsrMax(),
+    extra: getChecked('recExtraChips'),
+    intra: getChecked('recIntraChips'),
+    kamen: getChecked('recKamenChips'),
+    softTissue: getChecked('recSoftTissueChips'),
+    material: getChecked('recMaterialChips'),
+    doporuceni: getChecked('recRecommendChips'),
+    plak: document.getElementById('recPlak').value,
+    bop: document.getElementById('recBop').value,
+    recall: document.getElementById('recRecallOverride').value,
+    poznamka: document.getElementById('recPoznamka').value,
+    informZL: document.getElementById('recInformZL').checked,
+  };
+  p.vykony.unshift({datum: datumCz, nazev: nazev, tenant:'vaše praxe', cizi:false, detail: detail});
+  closeRecordModal();
+  openPatient(currentPatientId);
+  document.querySelectorAll('#view-detail .tab').forEach((t)=>t.classList.toggle('active', t.dataset.tab==='vykony'));
+  document.querySelectorAll('#view-detail .tabview').forEach((tv)=>tv.classList.toggle('active', tv.id==='tab-vykony'));
+  setScreenCode('S04.2');
+  renderPatients();
+  showToast(detail.informZL ? 'Záznam uzamčen a souhrn odeslán ošetřujícímu zubnímu lékaři' : 'Záznam z výkonu uložen a uzamčen proti úpravám', 'ti-lock');
+}
+
+function chipList(arr, emptyText){
+  if(!arr || !arr.length) return `<span style="color:var(--ink-3)">${emptyText||'bez záznamu'}</span>`;
+  return arr.map(t=>`<span class="tag neutral">${t}</span>`).join('');
+}
+
+function openVisitDetail(pid, idx){
+  const p = pById(pid);
+  const v = p.vykony[idx];
+  const box = document.getElementById('vdBody');
+  if(!v.detail){
+    box.innerHTML = `
+      <div class="info-box" style="margin-bottom:14px;">
+        <h4><i class="ti ti-calendar-event"></i>${v.datum} — ${v.nazev}</h4>
+        <p style="font-size:13px; color:var(--ink-2); margin:0;">Pracoviště: ${v.tenant}</p>
+      </div>
+      <div class="panel-note gray"><i class="ti ti-info-circle"></i>Podrobný strukturovaný klinický záznam pro tuto návštěvu není v systému veden (starší nebo dovezený záznam bez plné digitalizace).</div>`;
+  } else {
+    const d = v.detail;
+    const psrRow = (d.psrValues && d.psrValues.length) ? psrSextanty.map((s,i)=>`
+      <div class="psr-box"><label>${s.label} <span class="fdi">(${s.fdi})</span></label><div style="font-size:16px; font-weight:700; text-align:center;">${d.psrValues[i]}</div></div>`).join('') : '<span style="color:var(--ink-3)">nezaznamenáno</span>';
+    box.innerHTML = `
+      <div class="form-section">
+        <h4><i class="ti ti-calendar-event"></i>${v.datum} — ${d.visitLabel||v.nazev}</h4>
+        <p class="fs-sub">Trvání: ${d.trvani||'—'} · Pracoviště: ${v.tenant} ${d.informZL?'· <i class=\"ti ti-send\" style=\"font-size:12px\"></i> ošetřující ZL informován':''}</p>
+        ${d.doplnkove && d.doplnkove.length ? `<div>${chipList(d.doplnkove)}</div>` : ''}
+      </div>
+      <div class="form-section">
+        <h4><i class="ti ti-face-id"></i>Extraorální a intraorální vyšetření</h4>
+        <p class="fs-sub" style="margin-bottom:4px;">Extraorální nález</p>
+        <div style="margin-bottom:10px;">${chipList(d.extra)}</div>
+        <p class="fs-sub" style="margin-bottom:4px;">Intraorální nález</p>
+        <div>${chipList(d.intra)}</div>
+      </div>
+      <div class="form-section">
+        <h4><i class="ti ti-dental"></i>Parodontální screening (PSR / CPITN)</h4>
+        <div class="psr-grid">${psrRow}</div>
+        <div class="psr-legend">PSR max: <strong>${d.psrMax}</strong> · Zubní kámen: ${chipList(d.kamen,'nezjištěn')}</div>
+      </div>
+      <div class="form-section">
+        <h4><i class="ti ti-chart-bar"></i>Indexy hygieny</h4>
+        <div class="index-row" style="margin-bottom:6px;"><label>Plak index</label><span class="index-val">${d.plak} %</span></div>
+        <div class="index-row" style="margin-bottom:0;"><label>Krvácení při sondáži (BOP)</label><span class="index-val">${d.bop} %</span></div>
+      </div>
+      <div class="form-section">
+        <h4><i class="ti ti-stethoscope"></i>Stav měkkých tkání</h4>
+        <div>${chipList(d.softTissue,'bez nálezu')}</div>
+      </div>
+      <div class="form-section">
+        <h4><i class="ti ti-package"></i>Použitý materiál</h4>
+        <div>${chipList(d.material)}</div>
+      </div>
+      <div class="form-section">
+        <h4><i class="ti ti-list-check"></i>Doporučení pro pacienta</h4>
+        <div>${chipList(d.doporuceni)}</div>
+      </div>
+      <div class="form-section">
+        <h4><i class="ti ti-notes"></i>Suspektní nález a poznámka</h4>
+        <p style="font-size:13.5px; color:var(--ink-2); margin:0;">${d.poznamka || '—'}</p>
+      </div>
+      <div class="form-section">
+        <div class="confirm-box"><i class="ti ti-lock" style="margin-top:1px"></i><span>Záznam je uzamčen proti úpravám. Doporučený recall: za ${d.recall} měsíc(e/ů).</span></div>
+      </div>`;
+  }
+  document.getElementById('visitDetailModal').classList.add('show');
+  pushModalScreen('M05');
+}
+function closeVisitDetail(){ document.getElementById('visitDetailModal').classList.remove('show'); popModalScreen(); }
+document.getElementById('visitDetailModal').addEventListener('click', e=>{ if(e.target.id==='visitDetailModal') closeVisitDetail(); });
+
+function openPatientPreview(){ document.getElementById('patientPreviewModal').classList.add('show'); pushModalScreen('M04.1'); }
+function closePatientPreview(){ document.getElementById('patientPreviewModal').classList.remove('show'); popModalScreen(); }
+document.getElementById('patientPreviewModal').addEventListener('click', e=>{ if(e.target.id==='patientPreviewModal') closePatientPreview(); });
+
+function revokeGrant(btn){
+  const row = btn.closest('.grant-row');
+  row.style.opacity = '0.4';
+  btn.textContent = 'Odvoláno';
+  btn.disabled = true;
+  showToast('Přístupový grant byl odvolán', 'ti-shield-x');
+}
+
+let toastTimer;
+function showToast(msg, icon){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.querySelector('i').className = 'ti ' + (icon||'ti-check');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+let verified = true;
+document.getElementById('demoToggle').addEventListener('click', ()=>{
+  verified = !verified;
+  const pill = document.getElementById('verifyPill');
+  const banner = document.getElementById('verifyBanner');
+  const badge = document.getElementById('setupBadge');
+  const stepIcon = document.getElementById('verifyStepIcon');
+  const stepTitle = document.getElementById('verifyStepTitle');
+  const stepSub = document.getElementById('verifyStepSub');
+  if(verified){
+    pill.className = 'verify-pill ok'; pill.innerHTML = '<i class="ti ti-shield-check"></i> Ověřeno';
+    banner.classList.remove('show'); badge.style.display='none';
+    stepIcon.className='ostep-num done'; stepIcon.innerHTML='<i class="ti ti-check"></i>';
+    stepTitle.textContent='Ověřeno platformou'; stepSub.textContent='Ověřeno proti registru České komory zubních techniků a dentálních hygienistek, č. registrace DH-2024-0532 · aktivováno 5. 4. 2026';
+  } else {
+    pill.className = 'verify-pill pending'; pill.innerHTML = '<i class="ti ti-clock"></i> Čeká na ověření';
+    banner.classList.add('show'); badge.style.display='inline-block';
+    stepIcon.className='ostep-num'; stepIcon.innerHTML='<i class="ti ti-hourglass"></i>';
+    stepTitle.textContent='Čeká na ověření platformou'; stepSub.textContent='Registr komory obvykle odpoví do 3 pracovních dnů';
+    showToast('Demo: tenant nyní bez ověření — omezená funkčnost', 'ti-shield-x');
+  }
+});
+
+renderAgenda();
+renderCalendar();
+renderPatients();
+renderFinance();
+renderInventory();
+renderReviews();
+renderAudit();
+</script>
+</body>
+</html>

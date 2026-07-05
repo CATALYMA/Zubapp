@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZubApp / CoreKit — přehled modulů</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --border:#2b303c;
+    --text:#e8eaed; --muted:#9aa3b2; --accent:#5b8cff; --accent2:#38d9a9;
+    --warn:#f2b84b; --l1:#5b8cff; --l2:#38d9a9; --l3:#f2789a;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.5;
+  }
+  header{
+    padding:32px 32px 20px; border-bottom:1px solid var(--border);
+    position:sticky; top:0; background:rgba(15,17,21,0.92); backdrop-filter:blur(8px); z-index:20;
+  }
+  header h1{margin:0 0 4px; font-size:22px; font-weight:650;}
+  header p.sub{margin:0; color:var(--muted); font-size:14px;}
+  .meta-row{display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; font-size:13px; color:var(--muted);}
+  .meta-row .pill{background:var(--panel2); border:1px solid var(--border); border-radius:999px; padding:4px 12px;}
+  .meta-row .pill b{color:var(--text);}
+  main{max-width:1200px; margin:0 auto; padding:28px 32px 80px;}
+
+  .tabs{display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap;}
+  .tab{
+    padding:8px 16px; border-radius:999px; border:1px solid var(--border); background:var(--panel);
+    color:var(--muted); font-size:13px; cursor:pointer; user-select:none; transition:all .15s;
+  }
+  .tab:hover{color:var(--text);}
+  .tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .tab .dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;}
+
+  section.block{margin-bottom:44px;}
+  section.block h2{font-size:16px; margin:0 0 4px; font-weight:650;}
+  section.block .desc{color:var(--muted); font-size:13px; margin:0 0 18px; max-width:760px;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px; cursor:pointer; transition:border-color .15s, transform .1s;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .card:hover{border-color:var(--accent); transform:translateY(-1px);}
+  .card .top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .card .pkg{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; color:var(--accent); font-weight:600;}
+  .card .layer-badge{font-size:10.5px; padding:2px 8px; border-radius:999px; white-space:nowrap; font-weight:600;}
+  .layer-badge.L1{background:rgba(91,140,255,.15); color:var(--l1);}
+  .layer-badge.L2{background:rgba(56,217,169,.15); color:var(--l2);}
+  .layer-badge.L3{background:rgba(242,120,154,.15); color:var(--l3);}
+  .card .purpose{font-size:13px; color:var(--text); opacity:.9;}
+  .card .footer-row{display:flex; justify-content:space-between; align-items:center; margin-top:auto; font-size:12px; color:var(--muted);}
+  .status-chip{font-size:11px; padding:3px 9px; border-radius:6px; border:1px solid var(--border); white-space:nowrap;}
+  .status-chip.done{color:var(--l2); border-color:rgba(56,217,169,.4);}
+  .status-chip.progress{color:var(--warn); border-color:rgba(242,184,75,.4);}
+  .status-chip.todo{color:var(--muted);}
+  .deps-line{font-size:11.5px; color:var(--muted);}
+  .deps-line code{color:var(--text); background:var(--panel2); padding:1px 5px; border-radius:4px; font-size:11px;}
+
+  /* modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:flex-start; justify-content:center;
+    padding:5vh 16px; z-index:100; overflow-y:auto;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--panel); border:1px solid var(--border); border-radius:16px; max-width:680px; width:100%;
+    padding:28px; position:relative; margin-bottom:5vh;
+  }
+  .modal .close{position:absolute; top:16px; right:18px; cursor:pointer; color:var(--muted); font-size:20px; border:none; background:none;}
+  .modal .close:hover{color:var(--text);}
+  .modal h3{margin:0 0 2px; font-size:19px;}
+  .modal .modal-pkg{font-family:ui-monospace,monospace; color:var(--accent); font-size:14px; margin-bottom:14px;}
+  .modal section{margin-bottom:16px;}
+  .modal section h4{font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 6px; font-weight:650;}
+  .modal ul{margin:0; padding-left:18px; font-size:13.5px;}
+  .modal li{margin-bottom:4px;}
+  .modal p{margin:0; font-size:13.5px;}
+  .modal code{background:var(--panel2); padding:1px 6px; border-radius:5px; font-size:12.5px;}
+  .modal a{color:var(--accent); text-decoration:none;}
+  .modal a:hover{text-decoration:underline;}
+  .badge-list{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
+  .badge-list span{background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:3px 8px; font-size:11.5px;}
+
+  svg text{fill:var(--text); font-size:12px; font-family:inherit;}
+  .diagram-wrap{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px; overflow-x:auto;}
+
+  table.events{width:100%; border-collapse:collapse; font-size:13px;}
+  table.events th, table.events td{border-bottom:1px solid var(--border); padding:9px 12px; text-align:left;}
+  table.events th{color:var(--muted); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;}
+  table.events tr:hover td{background:var(--panel2);}
+  table.events code{background:var(--panel2); padding:1px 6px; border-radius:5px; font-size:12px;}
+
+  .other-list{display:flex; flex-direction:column; gap:10px;}
+  .other-item{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .other-item .name{font-weight:600; font-size:13.5px;}
+  .other-item .note{color:var(--muted); font-size:12.5px;}
+  .tag{font-size:11px; padding:2px 8px; border-radius:6px; background:var(--panel2); border:1px solid var(--border); color:var(--muted);}
+
+  footer{color:var(--muted); font-size:12px; padding:24px 32px; border-top:1px solid var(--border); text-align:center;}
+  footer a{color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ZubApp — přehled modulů CoreKit</h1>
+  <p class="sub">Konsolidovaný pohled na moduly navržené v samostatných chatech (architektura, modularizace, jednotlivé CoreKit briefy). Statická snímka, ne živý dashboard — pro aktuální stav úkolů viz YouTrack.</p>
+  <div class="meta-row">
+    <span class="pill">Projekt: <b>ZubApp</b> · shared core: <b>CoreKit</b></span>
+    <span class="pill">Modulů: <b id="stat-count">–</b></span>
+    <span class="pill">YouTrack stav: <b>vše „Otevřeno“</b> — implementace ještě nezačala</span>
+    <span class="pill">Snímek k: <b>5. 7. 2026</b></span>
+  </div>
+</header>
+
+<main>
+
+  <section class="block">
+    <h2>Filtr podle vrstvy</h2>
+    <p class="desc">Architektura rozděluje moduly do tří vrstev podle míry doménové specifičnosti — od obecného jádra po konfiguraci specifickou pro ZubApp.</p>
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-layer="all">Všechny</div>
+      <div class="tab" data-layer="L1"><span class="dot" style="background:var(--l1)"></span>Vrstva 1 — CoreKit (generic)</div>
+      <div class="tab" data-layer="L2"><span class="dot" style="background:var(--l2)"></span>Vrstva 2 — Healthcare platform</div>
+      <div class="tab" data-layer="L3"><span class="dot" style="background:var(--l3)"></span>Vrstva 3 — ZubApp-specifické</div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="block">
+    <h2>Graf závislostí</h2>
+    <p class="desc">Plná čára = pevná závislost balíčku. Přerušovaná čára = pluginové/oborové napojení (mimo CoreKit).</p>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 900 340" width="100%" style="min-width:640px">
+        <!-- boxes -->
+        <g id="dep-boxes"></g>
+        <!-- arrows drawn by JS -->
+        <g id="dep-arrows"></g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>Jak moduly spolupracují — eventy</h2>
+    <p class="desc">Hlavní „reuse povrch" mezi moduly (event schema registry). Klik na producenta/konzumenta zvýrazní modul výše.</p>
+    <table class="events" id="events-table">
+      <thead><tr><th>Událost</th><th>Producent</th><th>Konzument(i)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="block">
+    <h2>Ostatní artefakty projektu</h2>
+    <p class="desc">Dokumenty a prototypy, které nejsou samostatným CoreKit modulem, ale patří k celkovému obrazu ZubApp.</p>
+    <div class="other-list" id="other-list"></div>
+  </section>
+
+</main>
+
+<footer>
+  Zdrojové dokumenty: czech-dental-platform-architecture-modularization.md · czech-dental-platform-architecture.md · kickoff-checklist.md · corekit-*-brief.md (6×) · modularization-veterinary-check.md · pms-mapa-obrazovek.md — složka projektu ZubApp. YouTrack projekt: <a href="https://utisol1.youtrack.cloud/projects/CoreKit" target="_blank">CoreKit</a>.
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const LAYER_LABEL = {L1:'Vrstva 1 — CoreKit', L2:'Vrstva 2 — Healthcare platform', L3:'Vrstva 3 — ZubApp-specifické'};
+
+const modules = [
+  {
+    id:'identity', pkg:'@corekit/identity', name:'Identity & account/subject model', layer:'L1',
+    purpose:'Správa účtů a klíčového vztahu účet↔subjekt péče — jeden účet, 0..N navázaných subjektů (dítě u zubaře, zvíře u veterináře).',
+    responsibilities:[
+      'Registrace a přihlášení (e-mail/telefon/OAuth) přes Supabase Auth',
+      'Role a oprávnění — majitel účtu vs. personál poskytovatele, s rozlišením práv v rámci personálu',
+      'CRUD subjektů péče a jejich navázání na účet',
+      'Přístupová pravidla (RLS) — kdo smí vidět/upravovat čí subjekt'
+    ],
+    data:'účty, subjekty péče (jen obecná pole), role, oprávnění',
+    iface:'dotazy „kdo jsem“, „jaké subjekty spravuji“; eventy <code>AccountCreated</code>, <code>SubjectLinked</code>, <code>SubjectUnlinked</code>',
+    deps:[], dependents:['booking','notifications','messaging'],
+    status:'todo', statusLabel:'Brief + wireframy hotové · technický spec (datový model, RLS) chybí',
+    wireframes:['Přihlášení / registrace','„Moje účty péče“ (dental vs. vet varianta)','„Přidat subjekt“','„Detail subjektu“'],
+    youtrack:{milestone:'CoreKit-2', url:'https://utisol1.youtrack.cloud/issue/CoreKit-2', tasks:'CoreKit-11 až CoreKit-14 (vše Otevřeno)'},
+    note:'Klíčové rozhodnutí: vztah účet↔subjekt má stejný tvar napříč obory, ale ne stejná pravidla (dítě „vyroste“ do vlastního účtu, zvíře nikdy). Do modulu patří jen struktura, ne oborová pravidla.'
+  },
+  {
+    id:'booking', pkg:'@corekit/booking', name:'Booking engine (jádro)', layer:'L1',
+    purpose:'Správa dostupnosti a rezervací — pro obě strany, pacienta/majitele i ordinaci.',
+    responsibilities:[
+      'Definice slotů, prevence dvojitého zápisu',
+      'Vytvoření/zrušení/přesun rezervace, vazba na subject_id (ne na účet přímo)',
+      'Recepční/praxi-facing pohled — agenda ordinace (kdo přijde kdy, za koho)'
+    ],
+    data:'kalendáře poskytovatelů/zdrojů, sloty, rezervace',
+    iface:'<code>getAvailability</code>, <code>createBooking</code>, <code>cancelBooking</code>; eventy <code>AppointmentBooked</code>, <code>AppointmentCancelled</code>',
+    deps:['identity'], depsOptional:['notifications'], dependents:['messaging','reviews'],
+    status:'todo', statusLabel:'Brief + wireframy hotové · datový model kalendáře chybí',
+    wireframes:['Výběr termínu (patient-facing)','Potvrzení rezervace','Moje rezervace','Recepce — dnešní agenda','Detail rezervace na recepci'],
+    youtrack:{milestone:'CoreKit-4', url:'https://utisol1.youtrack.cloud/issue/CoreKit-4', tasks:'CoreKit-18, CoreKit-19 (vše Otevřeno)'},
+    note:'Otevřená otázka: multi-resource booking (místnost + lékař zvlášť) — rozhodnout před návrhem datového modelu. Pluginově se napojuje na PMS vrstvu (Vrstva 3) přes obecné rozhraní adaptéru, nikdy natvrdo proti konkrétnímu PMS produktu.'
+  },
+  {
+    id:'notifications', pkg:'@corekit/notifications', name:'Notification engine', layer:'L1',
+    purpose:'Doručování šablonovaných zpráv přes SMS, e-mail a push.',
+    responsibilities:[
+      'Šablonovací systém s korektní diakritikou',
+      'Volba SMS kódování (GSM-7 vs. UCS-2) kvůli ceně za zprávu',
+      'Plánování odeslání (např. připomínka 24–48 h před termínem)',
+      'Sledování stavu doručení',
+      'Uživatelské nastavení kanálů a předstihu připomínky (per účet)'
+    ],
+    data:'šablony (per obor/tenant), log odeslaných zpráv, stav doručení, preference',
+    iface:'<code>send(subjectId, templateKey, params)</code>; eventy <code>NotificationSent</code>, <code>NotificationFailed</code>',
+    deps:['identity'], depsOptional:['booking'], dependents:[],
+    status:'todo', statusLabel:'Brief hotový · šablonovací engine a výběr SMS providera chybí',
+    wireframes:['„Nastavení notifikací“ — toggly SMS/e-mail/push, volba předstihu'],
+    youtrack:{milestone:'CoreKit-3', url:'https://utisol1.youtrack.cloud/issue/CoreKit-3', tasks:'CoreKit-15 až CoreKit-17 (vše Otevřeno)'},
+    note:'Doporučený „první test“ modularizace — nulová oborová znalost. Plánování s delay 24–48 h řešit přes Vercel Workflows/Queues, ne přímo funkci (limit 300 s).'
+  },
+  {
+    id:'messaging', pkg:'@corekit/messaging', name:'Messaging service', layer:'L1',
+    purpose:'Obousměrná komunikace mezi účtem a poskytovatelem (ordinace).',
+    responsibilities:[
+      'Vlákna konverzací vázaná na konkrétní rezervaci (booking_id), ne jen na subjekt',
+      'Doručení v reálném čase, historie zpráv, stav přečteno/nepřečteno'
+    ],
+    data:'konverzace (klíčované přes booking_id), jednotlivé zprávy',
+    iface:'<code>sendMessage(bookingId, ...)</code>, <code>getThread(bookingId)</code>; event <code>MessageReceived</code>',
+    deps:['identity','booking'], dependents:[],
+    status:'todo', statusLabel:'Brief + wireframy hotové · datový model konverzací chybí',
+    wireframes:['Detail rezervace (pacient/majitel) se zabudovanou konverzací','Detail rezervace na recepci se stejným vzorem'],
+    youtrack:{milestone:'CoreKit-5 (sdílený s reviews)', url:'https://utisol1.youtrack.cloud/issue/CoreKit-5', tasks:'CoreKit-20 (Otevřeno)'},
+    note:'Design rozhodnutí (nezjednodušovat zpět): zprávy nejsou samostatná záložka „Zprávy“, ale součást objednávkového frame na detailu rezervace, na obou stranách.'
+  },
+  {
+    id:'reviews', pkg:'@corekit/reviews', name:'Review / reputation service', layer:'L1',
+    purpose:'Sběr a zobrazení hodnocení po proběhlé návštěvě/službě.',
+    responsibilities:['Vyžádání hodnocení po dokončené rezervaci','Ukládání a agregace skóre','Základní moderace'],
+    data:'jednotlivá hodnocení, agregované skóre poskytovatele',
+    iface:'<code>requestReview</code>, <code>submitReview</code>; event <code>ReviewSubmitted</code>',
+    deps:['booking'], dependents:[],
+    status:'todo', statusLabel:'Brief + wireframy hotové · nejméně rizikový modul celého CoreKitu',
+    wireframes:['„Žádost o hodnocení“ (prompt po návštěvě)','„Formulář hodnocení“ (hvězdičky + komentář)'],
+    youtrack:{milestone:'CoreKit-5 (sdílený s messaging)', url:'https://utisol1.youtrack.cloud/issue/CoreKit-5', tasks:'CoreKit-21 (Otevřeno)'},
+    note:'Nízká priorita v rollout plánu — až po funkčním bookingu v obou aplikacích.'
+  },
+  {
+    id:'payer', pkg:'Payer integration framework', name:'Napojení na plátce/pojišťovny', layer:'L2',
+    purpose:'Obecný plug-in mechanismus pro napojení na plátce (pojišťovny) — podání nároku, ověření krytí.',
+    responsibilities:['Definice rozhraní PayerAdapter','Asynchronní orchestrace přes frontu (výpadek pojišťovny nesmí blokovat booking)','Routing požadavku na konkrétní adaptér podle plátce'],
+    data:'nároky/claims a jejich stav, historie komunikace s plátcem',
+    iface:'<code>submitClaim</code>, <code>checkCoverage</code>; eventy <code>ClaimSubmitted</code>, <code>ClaimSettled</code>',
+    deps:['booking'], dependents:[], depsExternal:'konkrétní adaptéry (VZP a spol.) jsou oborové, mimo CoreKit',
+    status:'todo', statusLabel:'Jen koncept v architektuře — rámec zatím nenavržen',
+    wireframes:[],
+    youtrack:{milestone:'CoreKit-7 (Krok 6, odloženo na konec)', url:'https://utisol1.youtrack.cloud/issue/CoreKit-7', tasks:'CoreKit-25 (VZP adaptér), CoreKit-26 (ověřit pojištění mazlíčků) — vše Otevřeno'},
+    note:'Doporučení: navrhnout PayerAdapter interface ve „Fázi 1.5“, ještě než se postaví první konkrétní (VZP) adaptér — retrofit později je dražší. Jen rámec je znovupoužitelný, obsah je oborový.'
+  },
+  {
+    id:'audit', pkg:'Audit / compliance modul', name:'Logování přístupu k citlivým datům', layer:'L2',
+    purpose:'Logování přístupu ke zdravotním datům (GDPR čl. 9) a podpora práv subjektu údajů.',
+    responsibilities:['Append-only log každého přístupu/změny citlivých dat','Podpora exportu a výmazu dat na žádost subjektu'],
+    data:'auditní log',
+    iface:'middleware/hook volaný ostatními moduly při přístupu k citlivým datům',
+    deps:[], dependents:[], depsExternal:'zapojuje se prakticky do všech modulů sahajících na zdravotní data',
+    status:'todo', statusLabel:'Jen koncept v architektuře — bez vlastního YouTrack milníku',
+    wireframes:[],
+    youtrack:null,
+    note:'Právní odůvodnění (čl. 9 GDPR) platí jen pro lidské pacienty — u zvířat jde jen o dobrou praxi, ne zákonný požadavek.'
+  },
+  {
+    id:'pms', pkg:'PMS integrace adaptéry', name:'Konektory na zubařské PMS produkty', layer:'L3',
+    purpose:'Konkrétní konektory na zubařské PMS produkty, napojené na booking přes obecné rozhraní adaptéru.',
+    responsibilities:['Implementace checkAvailability/syncBooking pro konkrétní PMS produkt','Zůstává lokální, mimo CoreKit'],
+    data:'—', iface:'implementuje adaptérové rozhraní definované v @corekit/booking',
+    deps:['booking'], dependents:[],
+    status:'todo', statusLabel:'Rámec adaptéru navržen v booking briefu · konkrétní implementace zatím ne',
+    wireframes:[],
+    youtrack:{milestone:'součást CoreKit-6 (Krok 5)', url:'https://utisol1.youtrack.cloud/issue/CoreKit-6', tasks:'—'},
+    note:'Vazba na booking musí zůstat pluginová/přerušovaná — core booking nesmí být napsaný proti konkrétnímu PMS produktu.'
+  },
+  {
+    id:'zubapp-config', pkg:'ZubApp konfigurace', name:'Číselník výkonů, role zubař/hygienistka', layer:'L3',
+    purpose:'Oborová konfigurace nad vrstvami 1 a 2 — texty, číselníky a role specifické pro zubní péči.',
+    responsibilities:['Číselník zubařských výkonů','Role zubař / hygienistka a jejich oprávnění','UI texty specifické pro zubní péči'],
+    data:'číselníky, konfigurace rolí', iface:'—',
+    deps:[], dependents:[],
+    status:'todo', statusLabel:'Naplánováno na Krok 5 — po dokončení bookingu',
+    wireframes:[],
+    youtrack:{milestone:'CoreKit-6 (Krok 5)', url:'https://utisol1.youtrack.cloud/issue/CoreKit-6', tasks:'CoreKit-22 (číselník výkonů, role) — Otevřeno'},
+    note:'Vrstva 3 zůstává natvrdo v ZubApp — neplánuje se sdílet, i když stejný vzor (číselník + role) bude potřeba i pro budoucí VetApp.'
+  }
+];
+
+const events = [
+  ['AccountCreated','identity','—'],
+  ['SubjectLinked / SubjectUnlinked','identity','booking (dostupné subjekty), notifications (kontakt)'],
+  ['AppointmentBooked','booking','notifications (potvrzení + připomínka), messaging (založení vlákna)'],
+  ['AppointmentCancelled','booking','notifications (zrušení připomínky)'],
+  ['AppointmentCompleted','booking','reviews (vyžádání hodnocení), notifications (follow-up)'],
+  ['MessageReceived','messaging','notifications (upozornění)'],
+  ['ReviewSubmitted','reviews','— (interní agregace skóre)'],
+  ['checkAvailability / syncBooking (dotaz)','booking','PMS integrace (jen pokud ordinace PMS napojený má)']
+];
+
+const others = [
+  {name:'pms-hygienistky-prototyp.html', note:'Funkční interaktivní prototyp obrazovek S01–S10 + modálů M01–M05 (agenda, kalendář, pacienti, fakturace, sklad...). Samostatný artefakt, ne CoreKit modul.', tag:'hotový prototyp'},
+  {name:'pms-mapa-obrazovek.md', note:'Referenční mapa kódů obrazovek/záložek/modálů k prototypu — pro adresování zpětné vazby klienta.', tag:'referenční dokument'},
+  {name:'czech-dental-platform-architecture.md', note:'Původní architektonický dokument (rollout fáze, celkový návrh platformy) — návazný na modularizaci.', tag:'architektura'},
+  {name:'czech-dental-platform-architecture-modularization.md', note:'Zdrojový dokument klasifikace modulů do 3 vrstev — základ této stránky.', tag:'architektura'},
+  {name:'kickoff-checklist.md', note:'Postupový plán rozjezdu (Krok 0–6), rozhodnutí o stacku (Vercel + Supabase, EU region).', tag:'plán'},
+  {name:'modularization-veterinary-check.md', note:'Validační cvičení modularizace proti veterinární perspektivě (VetApp se teď nestaví, jen ověřuje návrh).', tag:'validace'},
+  {name:'zdroje-dentalni-hygienistka/', note:'5 zdrojových dokumentů (kvalifikační standard, etický kodex, kompetenční model...) pro definici obsahu klinického záznamu.', tag:'podklady'}
+];
+
+// ---- render cards ----
+const grid = document.getElementById('grid');
+document.getElementById('stat-count').textContent = modules.length;
+
+function statusChipHtml(m){
+  const cls = m.status === 'done' ? 'done' : (m.status === 'progress' ? 'progress' : 'todo');
+  const label = m.status === 'done' ? 'Hotovo' : (m.status === 'progress' ? 'V řešení' : 'Návrh / nezačato');
+  return `<span class="status-chip ${cls}">${label}</span>`;
+}
+
+function renderGrid(filter){
+  grid.innerHTML = '';
+  modules.filter(m => filter === 'all' || m.layer === filter).forEach(m => {
+    const depsTxt = m.deps.length ? m.deps.map(d=>`<code>${d}</code>`).join(', ') : '<code>žádné</code>';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="top">
+        <span class="pkg">${m.pkg}</span>
+        <span class="layer-badge ${m.layer}">${m.layer}</span>
+      </div>
+      <div class="purpose">${m.purpose}</div>
+      <div class="deps-line">Závisí na: ${depsTxt}</div>
+      <div class="footer-row">
+        ${statusChipHtml(m)}
+        <span>${m.youtrack ? m.youtrack.milestone : 'bez milníku'}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => openModal(m));
+    grid.appendChild(card);
+  });
+}
+
+function openModal(m){
+  const modal = document.getElementById('modal-content');
+  const resp = m.responsibilities.map(r=>`<li>${r}</li>`).join('');
+  const wf = m.wireframes.length ? `<ul>${m.wireframes.map(w=>`<li>${w}</li>`).join('')}</ul>` : '<p style="color:var(--muted)">Zatím žádné wireframy.</p>';
+  const yt = m.youtrack ? `<p><a href="${m.youtrack.url}" target="_blank">${m.youtrack.milestone}</a> — dílčí úkoly: ${m.youtrack.tasks}</p>` : '<p style="color:var(--muted)">Bez samostatného YouTrack milníku.</p>';
+  const depsExt = m.depsExternal ? `<p style="margin-top:6px; color:var(--muted); font-size:12.5px;">${m.depsExternal}</p>` : '';
+  const depOpt = m.depsOptional && m.depsOptional.length ? ` · volitelně: ${m.depsOptional.map(d=>`<code>${d}</code>`).join(', ')}` : '';
+
+  modal.innerHTML = `
+    <button class="close" aria-label="Zavřít">×</button>
+    <h3>${m.name}</h3>
+    <div class="modal-pkg">${m.pkg} <span class="layer-badge ${m.layer}" style="margin-left:8px;">${LAYER_LABEL[m.layer]}</span></div>
+    <section><h4>Účel</h4><p>${m.purpose}</p></section>
+    <section><h4>Zodpovědnost</h4><ul>${resp.map(r=>r).join('')}</ul></section>
+    <section><h4>Vlastněná data</h4><p>${m.data}</p></section>
+    <section><h4>Rozhraní navenek</h4><p>${m.iface}</p></section>
+    <section><h4>Závislosti</h4><p>${m.deps.length ? m.deps.map(d=>`<code>${d}</code>`).join(', ') : 'žádné — základní vrstva'}${depOpt}</p>${depsExt}</section>
+    <section><h4>Stav</h4><p>${statusChipHtml(m)} &nbsp; ${m.statusLabel}</p></section>
+    <section><h4>Wireframy</h4>${wf}</section>
+    <section><h4>YouTrack</h4>${yt}</section>
+    ${m.note ? `<section><h4>Poznámka</h4><p>${m.note}</p></section>` : ''}
+  `;
+  modal.querySelector('.close').addEventListener('click', closeModal);
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+document.getElementById('overlay').addEventListener('click', e => { if(e.target.id === 'overlay') closeModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+// tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    renderGrid(tab.dataset.layer);
+  });
+});
+renderGrid('all');
+
+// events table
+const tbody = document.querySelector('#events-table tbody');
+events.forEach(([ev,prod,cons]) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><code>${ev}</code></td><td>${prod}</td><td>${cons}</td>`;
+  tbody.appendChild(tr);
+});
+
+// other artifacts
+const otherList = document.getElementById('other-list');
+others.forEach(o => {
+  const row = document.createElement('div');
+  row.className = 'other-item';
+  row.innerHTML = `<div><div class="name">${o.name}</div><div class="note">${o.note}</div></div><span class="tag">${o.tag}</span>`;
+  otherList.appendChild(row);
+});
+
+// dependency diagram (simple hand-placed layout matching the module graph)
+(function drawDiagram(){
+  const boxes = [
+    {id:'identity', x:60,  y:150, w:150, h:50, label:'@corekit/identity', color:'var(--l1)'},
+    {id:'notifications', x:60, y:40, w:170, h:50, label:'@corekit/notifications', color:'var(--l1)'},
+    {id:'booking', x:340, y:150, w:150, h:50, label:'@corekit/booking', color:'var(--l1)'},
+    {id:'messaging', x:610, y:70, w:160, h:50, label:'@corekit/messaging', color:'var(--l1)'},
+    {id:'reviews', x:610, y:230, w:150, h:50, label:'@corekit/reviews', color:'var(--l1)'},
+    {id:'pms', x:340, y:270, w:150, h:50, label:'PMS integrace (V3)', color:'var(--l3)'}
+  ];
+  const boxG = document.getElementById('dep-boxes');
+  boxes.forEach(b=>{
+    boxG.innerHTML += `
+      <rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="10" fill="var(--panel2)" stroke="${b.color}" stroke-width="1.6"></rect>
+      <text x="${b.x + b.w/2}" y="${b.y + b.h/2 + 4}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11.5">${b.label}</text>
+    `;
+  });
+  const byId = Object.fromEntries(boxes.map(b=>[b.id,b]));
+  function center(b,side){
+    if(side==='right') return [b.x+b.w, b.y+b.h/2];
+    if(side==='left') return [b.x, b.y+b.h/2];
+    if(side==='top') return [b.x+b.w/2, b.y];
+    if(side==='bottom') return [b.x+b.w/2, b.y+b.h];
+  }
+  const arrows = [
+    [center(byId.identity,'right'), center(byId.booking,'left'), false],
+    [center(byId.notifications,'bottom'), center(byId.identity,'top'), false],
+    [center(byId.booking,'top'), center(byId.notifications,'right'), true],
+    [center(byId.booking,'right'), center(byId.messaging,'left'), false],
+    [center(byId.identity,'top'), [130,110], false],
+    [center(byId.booking,'right'), center(byId.reviews,'left'), false],
+    [center(byId.booking,'bottom'), center(byId.pms,'top'), true]
+  ];
+  const arrowG = document.getElementById('dep-arrows');
+  arrowG.innerHTML = `<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7d8699"/></marker></defs>`;
+  arrows.forEach(([p1,p2,dashed])=>{
+    if(!p1 || !p2) return;
+    arrowG.innerHTML += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#7d8699" stroke-width="1.4" marker-end="url(#arrow)" ${dashed?'stroke-dasharray="5,4"':''}></line>`;
+  });
+})();
+</script>
+
+</body>
+</html>

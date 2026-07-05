@@ -1,0 +1,10 @@
+Předmět: ZubApp — aktualizace vývoje (4. 7. 2026)
+
+Ahoj všichni,
+
+posílám shrnutí posledního vývoje na ZubApp — hlavně architektonická rozhodnutí (CoreKit modularizace, DentApp-first strategie, ověření stacku Vercel+Supabase), stav modulů a otevřené otázky. V příloze je i grafické znázornění architektury a závislostí mezi moduly.
+
+Detaily v přiloženém dokumentu. Otevřené otázky v sekci 7 potřebují reálné ověření (PMS trh, VZP API, ÚOOÚ výklad) — kdo má kontakty nebo info, ozvěte se.
+
+Díky,
+Jiří
